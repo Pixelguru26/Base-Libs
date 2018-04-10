@@ -1,5 +1,13 @@
 local lib={name="Line"}
-local Vec=assert(_VECTOR or require("Vec")() or require("lib/Vec")() or require("libs/Vec")(), "Cannot find/use 'Vec.lua', this is v.a requirement for "..lib.name.." to function!")
+local function safeRequire(...)
+  for i,v in ipairs({...}) do
+    local success,val = pcall(function () return require(v) end)
+    if success then return val end
+  end
+end
+
+local Vec=assert(_VECTOR or safeRequire("Vec","lib/Vec","libs/Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
+if type(Vec)=="function" then Vec = Vec() end
 
 local _LINE = {Vec(0,0),Vec(0,0),_CACHE={C=0}}
 local _CACHE = _LINE._CACHE

@@ -10,7 +10,7 @@ _VECTOR.h=2
 _VECTOR.H=2
 
 _VECTOR.meta={}
-
+local x,y
 function _VECTOR.__index(t,k)
 	if type(_VECTOR[k])=='function' then
 		return _VECTOR[k](t)
@@ -136,12 +136,13 @@ end
 
 	-- Vector magnitude - length
 	function _VECTOR.l(t)
-		local a = t.a
+		--[[local a = t.a
 		if a>7*math.pi/4 or a<math.pi/4 or a>3*math.pi/4 and a<5*math.pi/4 then
 			return t.x/math.cos(a)
 		else
 			return t.y/math.sin(a)
-		end
+		end]]--
+		return math.sqrt(t.x*t.x+t.y*t.y)
 	end
 	_VECTOR.L=_VECTOR.l
 
@@ -153,13 +154,13 @@ end
 	_VECTOR.N=_VECTOR.n
 
 	function _VECTOR.max(t)
-		return math.max(t.x,t.y)
+		return t.x>t.y and t.x or t.y
 	end
 	_VECTOR.MAX=_VECTOR.max
 	_VECTOR.Max=_VECTOR.max
 
 	function _VECTOR.min(t)
-		return math.min(t.x,t.y)
+		return t.x<t.y and t.x or t.y
 	end
 	_VECTOR.MIN=_VECTOR.min
 	_VECTOR.Min=_VECTOR.min
@@ -185,7 +186,9 @@ end
 	_VECTOR.ABSOLUTE=_VECTOR.abs
 
 	function _VECTOR.funcs.dist(self,other)
-		return (self-other).l
+		x = other.x-self.x
+		y = other.y-self.y
+		return math.sqrt(x*x+y*y)
 	end
 
 	function _VECTOR.funcs.copy(self,a,b)
@@ -224,7 +227,7 @@ _VECTOR.Zero=_VECTOR.zero
 _VECTOR.ZERO=_VECTOR.zero
 
 function _VECTOR.funcs.isWithinRec(self,rect)
-	return type(rect)=="table" and rect.type=="rectangle" and self >= rect.pos1 and self <= rect.pos4
+	return self.x>=rect.x and self.x<=rect.r and self.y>=rect.y and self.y<=rect.b
 end
 
 function _VECTOR.funcs.limit(self,min,max)
@@ -271,13 +274,13 @@ function _VECTOR.funcs.mod(self,other)
 	return self
 end
 
-function dist(x1,y1,x2,y2)
+--[[function dist(x1,y1,x2,y2)
 	if type(x1)=="table" then -- vec mode
 		return dist(x1.x,x1.y,y1.x,y1.y)
 	else
 		return math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
 	end
-end
+end]]--
 
 local function ret(...)
 	local args={...}

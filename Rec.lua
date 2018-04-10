@@ -1,5 +1,14 @@
 local lib={name="Rec"}
-local Vec=assert(_VECTOR or require("Vec")() or require("lib/Vec")() or require("libs/Vec")(), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
+
+local function safeRequire(...)
+	for i,v in ipairs({...}) do
+		local success,val = pcall(function () return require(v) end)
+		if success then return val end
+	end
+end
+
+local Vec=assert(_VECTOR or safeRequire("Vec","lib/Vec","libs/Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
+if type(Vec)=="function" then Vec = Vec() end
 
 local _RECTANGLE={0,0,0,0,type="rectangle",_CACHE={}}
 local _CACHE = _RECTANGLE._CACHE
@@ -89,13 +98,7 @@ _RECTANGLE.data={}
 			return Vec(v.x,v.y)
 		end
 	end
-	function _RECTANGLE.pos1(v,iv)
-		if iv then
-			v.x=iv.x
-			v.y=iv.y
-		end
-		return Vec(v.x,v.y)
-	end
+	_RECTANGLE.pos1 = _RECTANGLE.pos
 	function _RECTANGLE.pos2(v,iv)
 		if iv then
 			v.r=iv.x
@@ -105,17 +108,17 @@ _RECTANGLE.data={}
 	end
 	function _RECTANGLE.pos3(v,iv)
 		if iv then
-			v.x=iv.x
-			v.b=iv.y
-		end
-		return Vec(v.x,v.b)
-	end
-	function _RECTANGLE.pos4(v,iv)
-		if iv then
 			v.r=iv.x
 			v.b=iv.y
 		end
 		return Vec(v.r,v.b)
+	end
+	function _RECTANGLE.pos4(v,iv)
+		if iv then
+			v.x=iv.x
+			v.b=iv.y
+		end
+		return Vec(v.x,v.b)
 	end
 	function _RECTANGLE.pos5(v,iv)
 		if iv then
@@ -144,6 +147,13 @@ _RECTANGLE.data={}
 				v.t<=iv.b and
 				v.b>=iv.t)
 	end
+	function _RECTANGLE.relate(v,iv)
+		-- ALL DISTANCES POSITIVE
+		return v.l-iv.r, -- distance to the left
+			iv.l-v.r, -- distance to the right
+			v.t-iv.b, -- distance up
+			iv.t-v.b -- distance down
+	end
 	function _RECTANGLE.fullIntersect(v,iv)
 		return v:intersect(iv),v:relate(iv)
 	end
@@ -153,16 +163,6 @@ _RECTANGLE.data={}
 		local w = v.r < iv.r and v.r-x or iv.r-x
 		local h = v.b < iv.b and v.b-y or iv.b-y
 		return _RECTANGLE(x,y,w,h)
-	end
-	function _RECTANGLE.relate(v,iv)
-		-- ALL DISTANCES POSITIVE
-		local dists={
-			v.l-iv.r, -- distance to the left
-			iv.l-v.r, -- distance to the right
-			v.t-iv.b, -- distance up
-			iv.t-v.b -- distance down
-		}
-		return dists
 	end
 	function _RECTANGLE.expelDir(v,iv)
 		local l1,r1,u1,d1 = unpack(v:relate(iv))
