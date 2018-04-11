@@ -1,5 +1,8 @@
-local _VECTOR={0,0,funcs={},type="vector",_CACHE={C=0}}
+local _VECTOR={0,0,funcs={},type="vector",_CACHE={C=0},volMode=false,volMath=false,_VOLATILES={C=0}}
 local _CACHE = _VECTOR._CACHE
+local _VOLATILES = _VECTOR._VOLATILES
+local _CC = _CACHE.C
+local _VC = _VOLATILES.C
 _VECTOR.x=1
 _VECTOR.X=1
 _VECTOR.y=2
@@ -38,62 +41,62 @@ end
 -- maths
 	function _VECTOR.__add(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x+b.x,a.y+b.y)
+	        return _VECTOR(a.x+b.x,a.y+b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x+b,a.y+b)
+	        return _VECTOR(a.x+b,a.y+b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x+a,b.y+a)
+	        return _VECTOR(b.x+a,b.y+a,true)
 	    end
 	end
 	function _VECTOR.__sub(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x-b.x,a.y-b.y)
+	        return _VECTOR(a.x-b.x,a.y-b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x-b,a.y-b)
+	        return _VECTOR(a.x-b,a.y-b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x-a,b.y-a)
+	        return _VECTOR(b.x-a,b.y-a,true)
 	    end
 	end
 	function _VECTOR.__mul(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x*b.x,a.y*b.y)
+	        return _VECTOR(a.x*b.x,a.y*b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x*b,a.y*b)
+	        return _VECTOR(a.x*b,a.y*b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x*a,b.y*a)
+	        return _VECTOR(b.x*a,b.y*a,true)
 	    end
 	end
 	function _VECTOR.__div(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x/b.x,a.y/b.y)
+	        return _VECTOR(a.x/b.x,a.y/b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x/b,a.y/b)
+	        return _VECTOR(a.x/b,a.y/b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x/a,b.y/a)
+	        return _VECTOR(b.x/a,b.y/a,true)
 	    end
 	end
 	function _VECTOR.__mod(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x%b.x,a.y%b.y)
+	        return _VECTOR(a.x%b.x,a.y%b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x%b,a.y%b)
+	        return _VECTOR(a.x%b,a.y%b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x%a,b.y%a)
+	        return _VECTOR(b.x%a,b.y%a,true)
 	    end
 	end
 	function _VECTOR.__pow(a,b)
 	    if type(a)=='table' and type(b)=='table' then
-	        return _VECTOR(a.x^b.x,a.y^b.y)
+	        return _VECTOR(a.x^b.x,a.y^b.y,true)
 	    elseif type(a)=='table' then
-	        return _VECTOR(a.x^b,a.y^b)
+	        return _VECTOR(a.x^b,a.y^b,true)
 	    elseif type(b)=='table' then
-	        return _VECTOR(b.x^a,b.y^a)
+	        return _VECTOR(b.x^a,b.y^a,true)
 	    end
 	end
 	function _VECTOR.__concat(a,b) -- DOT PRODUCT
 	    if type(a)=='table' and type(b)=='table' then
 	    	local al = a.l
-	    	return(a.x/a.l*b.x+a.y/a.l*b.y)
+	    	return(a.x/a.l*b.x+a.y/a.l*b.y,true)
 	    end
 	end
 
@@ -149,7 +152,7 @@ end
 	-- Vector unit - converts vector to unit length
 	function _VECTOR.n(t)
 		local l=t.l
-		return _VECTOR(t.x/l,t.y/l)
+		return _VECTOR(t.x/l,t.y/l,true)
 	end
 	_VECTOR.N=_VECTOR.n
 
@@ -166,7 +169,7 @@ end
 	_VECTOR.Min=_VECTOR.min
 
 	function _VECTOR.r(v)
-		return _VECTOR(v.y,v.x)
+		return _VECTOR(v.y,v.x,true)
 	end
 	_VECTOR.rev=_VECTOR.r
 	_VECTOR.reverse=_VECTOR.r
@@ -177,7 +180,7 @@ end
 	_VECTOR.REVERSE=_VECTOR.r
 
 	function _VECTOR.abs(v)
-		return _VECTOR(math.abs(v.x),math.abs(v.y))
+		return _VECTOR(math.abs(v.x),math.abs(v.y),true)
 	end
 	_VECTOR.Abs=_VECTOR.abs
 	_VECTOR.ABS=_VECTOR.abs
@@ -201,17 +204,21 @@ end
 		end
 	end
 
-
-function _VECTOR.meta.__call(t,x,y)
+function _VECTOR.meta.__call(t,x,y,math)
 	local v
-	if _CACHE.C>0 then
-		v=table.remove(_CACHE,_CACHE.C)
-		_CACHE.C = _CACHE.C-1
+	if _CC>0 then
+		v=_CACHE[_CC]
+		_CACHE[_CC]=nil
+		_CC = _CC-1
 	else
 		v = {}
 	end
 	v[1] = x
 	v[2] = y
+	if _VECTOR.volMode or (math and _VECTOR.volMath) then
+		_VC = _VOLATILES._C + 1
+		_VOLATILES[_VC] = v
+	end
 	return setmetatable(v,_VECTOR)
 end
 
@@ -233,13 +240,52 @@ end
 function _VECTOR.funcs.limit(self,min,max)
 	return Vec(
 		self.x < min.x and min.x or (self.x > max.x and max.x or self.x),
-		self.y < min.y and min.y or (self.y > max.y and max.y or self.y)
+		self.y < min.y and min.y or (self.y > max.y and max.y or self.y),
+		true
 		)
 end
 
 function _VECTOR.funcs.del(self)
-	table.insert(_CACHE,self)
-	_CACHE.C = _CACHE.C+1
+	_CC = _CC+1
+	_CACHE[_CC] = self
+	return self
+end
+function _VECTOR.funcs.vol(self)
+	_VC = _VC + 1
+	_VOLATILES[_VC] = self
+end
+function _VECTOR.crunch()
+	for i,v in ipairs(_VOLATILES) do
+		_CC = _CC + 1
+		_CACHE[C] = v
+		_VOLATILES[i] = nil
+	end
+	_VC = 0
+end
+function _VECTOR.stepCrunch()
+	if _VC > 0 then
+		_CC = _CC + 1
+		_CACHE[_CC] = _VOLATILES[_VC]
+
+		_VOLATILES[_VC] = nil
+		_VC = _VC - 1
+	end
+end
+function _VECTOR.funcs.unVol(self)
+	for i=_VC,1,-1 do
+		if _VOLATILES[i] == self then
+			_VC = _VC - 1
+			return table.remove(_VOLATILES,i)
+		end
+	end
+	return self
+end
+function _VECTOR.funcs.QUVol(self)
+	if _VC == self then
+		_VOLATILES[_VC] = nil
+		_VC = _VC - 1
+		return self
+	end
 	return self
 end
 
