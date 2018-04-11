@@ -96,7 +96,7 @@ end
 	function _VECTOR.__concat(a,b) -- DOT PRODUCT
 	    if type(a)=='table' and type(b)=='table' then
 	    	local al = a.l
-	    	return(a.x/a.l*b.x+a.y/a.l*b.y,true)
+	    	return(a.x/a.l*b.x+a.y/a.l*b.y)
 	    end
 	end
 

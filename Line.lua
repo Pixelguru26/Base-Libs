@@ -44,7 +44,7 @@ function _LINE.aliases.x(t,v)
 		return min(t.a.x,t.b.x)
 	end
 end
-_LINE.aliases.x0 = _LINE.aliases.x
+_LINE.aliases.x1 = _LINE.aliases.x
 -- top left y
 function _LINE.aliases.y(t,v)
 	if v then
@@ -57,10 +57,10 @@ function _LINE.aliases.y(t,v)
 		return min(t.a.y,t.b.y)
 	end
 end
-_LINE.aliases.y0 = _LINE.aliases.y
+_LINE.aliases.y1 = _LINE.aliases.y
 
 -- v.bottom right x
-function _LINE.aliases.x1(t,v)
+function _LINE.aliases.x2(t,v)
 	if v then
     if v.a.x >= v.b.x then
       t.a.x = v
@@ -72,7 +72,7 @@ function _LINE.aliases.x1(t,v)
 	end
 end
 -- v.bottom right y
-function _LINE.aliases.y1(t,v)
+function _LINE.aliases.y2(t,v)
 	if v then
     if v.a.y >= v.b.y then
       t.a.y = v
