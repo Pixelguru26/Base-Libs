@@ -145,4 +145,56 @@ The following methods are, of course, read-only:
 Line.lua
 ---
 
-(todo)
+Line.lua is a line class library designed in the fashion of Vec and Rec. It requires Vec to work, the same way Rec does. Line is designed to provide basic utilities for line segments, such as intersection, extension, extracting slopes, rotation, etc.
+
+It is instantiated more or less as standard:
+
+```lua
+local line = Line(0,0,10,10)
+local line = Line(Vec(0,0),Vec(10,10))
+```
+
+Either of these methods will produce a line segment from (0,0) to (10,10)
+The components of the line are A and B, respectively.
+
+The line supports the following properties, similarly to the rectangle:
+
+>* `line.x` returns the minimum x coordinate of the line (set)
+* `line.x1` alias of x
+* `line.y` returns the minimum y coordinate of the line (set)
+* `line.y1` alias of y
+* `line.x2` returns the maximum x coordinate of the line (set)
+* `line.y2` returns the maximum y coordinate of the line (set)
+* `line.l` returns the leftmost vector of the line (set)
+* `line.r` returns the rightmost vector of the line (set)
+* `line.u` returns the uppermost vector of the line (set)
+* `line.d` returns the bottommost vector of the line (set)
+* `line.dx` returns the width of the line (b-a, thus negative if B is left of A) (shifts b)
+* `line.dy` returns the height of the line (b-a, thus negative if B is above A) (shifts b)
+* `line.m` returns the slope of the line, calculated sensibly (read only)
+* `line.yInt` returns the y intercept of the line (moves line)
+* `line.mx` returns the middle x coordinate of the line (moves line)
+* `line.my` returns the middle y coordinate of the line (moves line)
+* `line.mid` returns a vector for the middle of the line (moves line)
+* `line.angle` returns the angle from A to B (`math.atan2(dy,dx)`) (read only)
+* `line.length` returns the distance from A to B (moves B)
+
+The following methods are also supported:
+
+>* `line:solveY(x)` returns the y value for the given x
+* `line:solveX(y)` returns the x value for the given y
+* `line:hasX(x)` returns true if the line extends through (or ends at) the given x
+* `line:hasY(y)` returns true if the line extends through (or ends at) the given y
+* `line:hasPoint(x,y)` returns true if the line includes or ends at the given coordinates
+* `line:isVert()` returns true if the line is vertical
+* `line:parallel(line2)` returns true if the lines' slopes are equal
+* `line:intersectX(line2)` Apparently returns the x coordinate of intersection *if* there is a proper intersection; I have no memory, TODO.
+* `line:intersect(line2)` returns true if intersecting, then x and y of intersection.
+* `line:normal(dir,dist)` returns a right normal with a distance of one by default. If dir is 'l', will return a left normal. If dist is supplied, will use that.
+* `line:mir(x,y)` `line:mir(vec)` reflects the coordinates about the line. Returns type in kind with input.
+* `line:perpA()` returns a perpendicular line intersecting on A
+* `line:perpB()` returns a perpendicular line intersecting on B
+* `line:perpM()` returns a perpendicular line intersecting in the middle
+* `line:unpack()` returns ax, ay, bx, by
+
+* `line:del()` recycles the line as above.

@@ -208,7 +208,7 @@ function _LINE.aliases.mid(t,v)
     t.mx = v.x
     t.my = v.y
   else
-    return t.mx,t.my
+    return Vec(t.mx,t.my)
   end
 end
 -- crazy shit like angles
@@ -221,14 +221,12 @@ function _LINE.aliases.angle(t,v)
 end
 function _LINE.aliases.length(t,v)
   if v then
-    
+    local l = math.sqrt(t.dx*t.dx+t.dy*t.dy)
+    local ratio = v/l
+    t.b.x = t.a.x + (t.b.x-t.a.x)*ratio
+    t.b.y = t.a.y + (t.b.y-t.a.y)*ratio
   else
-    local a = t.angle
-    if a>7*math.pi/4 or a<math.pi/4 or a>3*math.pi/4 and a<5*math.pi/4 then
-      return t.dx/math.cos(a)
-    else
-      return t.dy/math.sin(a)
-    end
+    return math.sqrt(t.dx*t.dx+t.dy*t.dy)
   end
 end
 -- ========================================== Methods
@@ -240,10 +238,10 @@ function _LINE.solveX(self,y)
 	return lerp((y-self.y)/(self.dy),self.u.x,self.d.x)
 end
 function _LINE.hasX(self,x)
-  return x>=self.x and x<=self.x1
+  return x>=self.x and x<=self.x2
 end
 function _LINE.hasY(self,y)
-  return y>=self.y and y<=self.y1
+  return y>=self.y and y<=self.y2
 end
 function _LINE.hasPoint(self,x,y)
   return self:hasX(x) and (self:solveX(x)==y or (self:isVert() and self:hasY(y)))
@@ -251,7 +249,7 @@ end
 function _LINE.isVert(self)
   return self.a.x == self.b.x
 end
-function _LINE.parallelIntersect(self,other)
+function _LINE.parallel(self,other)
   return self.m == other.m
 end
 function _LINE.intersectX(self,other)
@@ -299,15 +297,16 @@ function _LINE.normal(self,dir,dist)
   local ay = self.my
   return _LINE(ax,ay,ax+math.cos(angle)*dist,ay+math.sin(angle)*dist)
 end
-function _LINE.mirVec(self,v)
-  local x,y,m,b = v.x,v.y,self.m,self.yInt
-  local d = (x+m*(y-b))/(1+m*m)
-  return Vec(2*d-x,2*d*m-y+2*b)
-end
 function _LINE.mir(self,x,y)
-  local m,b = self.m,self.yInt
-  local d = (x+m*(y-b))/(1+m*m)
-  return Vec(2*d-x,2*d*m-y+2*b)
+  if type(x)~="table" then
+    local m,b = self.m,self.yInt
+    local d = (x+m*(y-b))/(1+m*m)
+    return 2*d-x,2*d*m-y+2*b
+  else
+    local x,y,m,b = v.x,v.y,self.m,self.yInt
+    local d = (x+m*(y-b))/(1+m*m)
+    return Vec(2*d-x,2*d*m-y+2*b)
+  end
 end
 function _LINE.perpA(self)
   return _LINE(self.a.x,self.a.y,self.a.x+self.dy,self.a.y-self.dx)
