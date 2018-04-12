@@ -216,7 +216,7 @@ function _VECTOR.meta.__call(t,x,y,math)
 	v[1] = x
 	v[2] = y
 	if _VECTOR.volMode or (math and _VECTOR.volMath) then
-		_VC = _VOLATILES._C + 1
+		_VC = _VOLATILES.C + 1
 		_VOLATILES[_VC] = v
 	end
 	return setmetatable(v,_VECTOR)
