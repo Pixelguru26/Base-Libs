@@ -1,8 +1,6 @@
 local _VECTOR={0,0,funcs={},type="vector",_CACHE={C=0},volMode=false,volMath=false,_VOLATILES={C=0}}
 local _CACHE = _VECTOR._CACHE
 local _VOLATILES = _VECTOR._VOLATILES
-local _CC = _CACHE.C
-local _VC = _VOLATILES.C
 _VECTOR.x=1
 _VECTOR.X=1
 _VECTOR.y=2
@@ -206,18 +204,18 @@ end
 
 function _VECTOR.meta.__call(t,x,y,math)
 	local v
-	if _CC>0 then
-		v=_CACHE[_CC]
-		_CACHE[_CC]=nil
-		_CC = _CC-1
+	if _CACHE.C>0 then
+		v=_CACHE[_CACHE.C]
+		_CACHE[_CACHE.C]=nil
+		_CACHE.C = _CACHE.C-1
 	else
 		v = {}
 	end
 	v[1] = x
 	v[2] = y
 	if _VECTOR.volMode or (math and _VECTOR.volMath) then
-		_VC = _VOLATILES.C + 1
-		_VOLATILES[_VC] = v
+		_VOLATILES.C = _VOLATILES.C + 1
+		_VOLATILES[_VOLATILES.C] = v
 	end
 	return setmetatable(v,_VECTOR)
 end
@@ -246,44 +244,44 @@ function _VECTOR.funcs.limit(self,min,max)
 end
 
 function _VECTOR.funcs.del(self)
-	_CC = _CC+1
-	_CACHE[_CC] = self
+	_CACHE.C = _CACHE.C+1
+	_CACHE[_CACHE.C] = self
 	return self
 end
 function _VECTOR.funcs.vol(self)
-	_VC = _VC + 1
-	_VOLATILES[_VC] = self
+	_VOLATILES.C = _VOLATILES.C + 1
+	_VOLATILES[_VOLATILES.C] = self
 end
 function _VECTOR.crunch()
 	for i,v in ipairs(_VOLATILES) do
-		_CC = _CC + 1
+		_CACHE.C = _CACHE.C + 1
 		_CACHE[C] = v
 		_VOLATILES[i] = nil
 	end
-	_VC = 0
+	_VOLATILES.C = 0
 end
 function _VECTOR.stepCrunch()
-	if _VC > 0 then
-		_CC = _CC + 1
-		_CACHE[_CC] = _VOLATILES[_VC]
+	if _VOLATILES.C > 0 then
+		_CACHE.C = _CACHE.C + 1
+		_CACHE[_CACHE.C] = _VOLATILES[_VOLATILES.C]
 
-		_VOLATILES[_VC] = nil
-		_VC = _VC - 1
+		_VOLATILES[_VOLATILES.C] = nil
+		_VOLATILES.C = _VOLATILES.C - 1
 	end
 end
 function _VECTOR.funcs.unVol(self)
-	for i=_VC,1,-1 do
+	for i=_VOLATILES.C,1,-1 do
 		if _VOLATILES[i] == self then
-			_VC = _VC - 1
+			_VOLATILES.C = _VOLATILES.C - 1
 			return table.remove(_VOLATILES,i)
 		end
 	end
 	return self
 end
 function _VECTOR.funcs.QUVol(self)
-	if _VC == self then
-		_VOLATILES[_VC] = nil
-		_VC = _VC - 1
+	if _VOLATILES.C == self then
+		_VOLATILES[_VOLATILES.C] = nil
+		_VOLATILES.C = _VOLATILES.C - 1
 		return self
 	end
 	return self
@@ -347,7 +345,7 @@ function _VECTOR.funcs.mod(self,other)
 		self[2] = self[2] % other
 	else
 		self[1] = self[1] % other[1]
-		self[2] = self[2] %2]
+		self[2] = self[2] % other[2]
 	end
 	return self
 end
