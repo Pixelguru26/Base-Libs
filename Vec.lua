@@ -290,33 +290,65 @@ function _VECTOR.funcs.QUVol(self)
 end
 
 function _VECTOR.funcs.inc(self,other)
-	self[1] = self[1] + other[1]
-	self[2] = self[2] + other[2]
+	if type(other)~="table" then
+		self[1] = self[1] + other
+		self[2] = self[2] + other
+	else
+		self[1] = self[1] + other[1]
+		self[2] = self[2] + other[2]
+	end
 	return self
 end
+_VECTOR.funcs.add = _VECTOR.funcs.inc
 function _VECTOR.funcs.dec(self,other)
-	self[1] = self[1] - other[1]
-	self[2] = self[2] - other[2]
+	if type(other)~="table" then
+		self[1] = self[1] - other
+		self[2] = self[2] - other
+	else
+		self[1] = self[1] - other[1]
+		self[2] = self[2] - other[2]
+	end
 	return self
 end
+_VECTOR.funcs.sub = _VECTOR.funcs.inc
 function _VECTOR.funcs.mul(self,other)
-	self[1] = self[1] * other[1]
-	self[2] = self[2] * other[2]
+	if type(other)~="table" then
+		self[1] = self[1] * other
+		self[2] = self[2] * other
+	else
+		self[1] = self[1] * other[1]
+		self[2] = self[2] * other[2]
+	end
 	return self
 end
 function _VECTOR.funcs.div(self,other)
-	self[1] = self[1] / other[1]
-	self[2] = self[2] / other[2]
+	if type(other)~="table" then
+		self[1] = self[1] / other
+		self[2] = self[2] / other
+	else
+		self[1] = self[1] / other[1]
+		self[2] = self[2] / other[2]
+	end
 	return self
 end
 function _VECTOR.funcs.set(self,other)
-	self[1] = other[1]
-	self[2] = other[2]
+	if type(other)~="table" then
+		self[1] = other
+		self[2] = other
+	else
+		self[1] = other[1]
+		self[2] = other[2]
+	end
 	return self
 end
 function _VECTOR.funcs.mod(self,other)
-	self[1] = self[1] % other[1]
-	self[2] = self[2] % other[2]
+	if type(other)~="table" then
+		self[1] = self[1] % other
+		self[2] = self[2] % other
+	else
+		self[1] = self[1] % other[1]
+		self[2] = self[2] %2]
+	end
 	return self
 end
 

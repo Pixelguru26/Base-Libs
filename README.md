@@ -48,7 +48,7 @@ The following functions and properties are also supported:
 >* `vec:dist(vec2)` returns the distance between the vectors
 * `vec:copy(dx,dy)` `vec:copy(dv)` copies vec, adding either the delta x and y or the delta vector.
 * `vec:dec(vec2)` garbageless shorthand for `vec = vec - vec2`
-* `vec:add(vec2)` garbageless shorthand for `vec = vec + vec2`
+* `vec:inc(vec2)` garbageless shorthand for `vec = vec + vec2`
 * `vec:mul(vec2)` garbageless shorthand for `vec = vec * vec2`
 * `vec:div(vec2)` garbageless shorthand for `vec = vec / vec2`
 * `vec:mod(vec2)` garbageless shorthand for `vec = vec % vec2`
