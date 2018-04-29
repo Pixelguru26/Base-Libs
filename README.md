@@ -51,8 +51,9 @@ The following functions and properties are also supported:
 * `vec:inc(vec2)` garbageless shorthand for `vec = vec + vec2`
 * `vec:mul(vec2)` garbageless shorthand for `vec = vec * vec2`
 * `vec:div(vec2)` garbageless shorthand for `vec = vec / vec2`
-* `vec:mod(vec2)` garbageless shorthand for `vec = vec % vec2`
+* `vec:mod(vec2)` garbageless shorthand for `vec = vec % vec2`.
 * `vec:set(vec2)` copies the values of vec2 into vec
+* `vec:unpack()` returns the x and y components of the vector
 
 * `vec:del()` garbage recycling for vec; pushes vec onto the reuse stack for future vectors to save RAM.
 
@@ -139,6 +140,7 @@ The following methods are, of course, read-only:
 * `for v in rec:iter(rec2)` iterates rec2 through rec in "stamp" fashion. Developed for use in grid/list-style menus. V is the rectangle representing the current space.
 * `rec:regressB(vec)` I'll... update this as soon as I actually remember what the heck this is for...
 * `rec:regress(rec2,vec)` This too.
+* `rec:unpack()` returns the top left x, top left y, width, and height of the box.
 
 >* `rec:del()` recycles rec in similar fashion to the Vec library
 
@@ -198,3 +200,35 @@ The following methods are also supported:
 * `line:unpack()` returns ax, ay, bx, by
 
 * `line:del()` recycles the line as above.
+
+OLoad.lua
+---
+
+OLoad.lua is a super simple function for creating function overloads. It's not the best in any regards, but it's there.
+Usage is as follows:
+
+```lua
+local overLoad = require("OLoad")
+-- create an overloadable function:
+local overLoadedFunction = overLoad(
+	-- a function overload
+	function(a,b,c)
+		return "number","string","table"
+	end,
+	-- the arguments for the previous overload
+	{"number","string","table"},
+	-- repeat for every initial overload
+)
+-- add a version to an overloaded function:
+overLoadedFunction:add(
+	function(a,b,c)
+		return "string", "table", "number"
+	end,
+	{"string","table","number"}
+	-- 'add' can only handle one function at a time for now.
+)
+-- execute an overloaded function:
+print(
+	overLoadedFunction(1,"str",{}) -- calls the correct version of the function for the given arg types
+) -- prints "number	string	table"
+```

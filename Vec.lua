@@ -208,11 +208,11 @@ function _VECTOR.meta.__call(t,x,y,math)
 		v=_CACHE[_CACHE.C]
 		_CACHE[_CACHE.C]=nil
 		_CACHE.C = _CACHE.C-1
+		v[1] = x
+		v[2] = y
 	else
-		v = {}
+		v = {x,y}
 	end
-	v[1] = x
-	v[2] = y
 	if _VECTOR.volMode or (math and _VECTOR.volMath) then
 		_VOLATILES.C = _VOLATILES.C + 1
 		_VOLATILES[_VOLATILES.C] = v
@@ -241,6 +241,10 @@ function _VECTOR.funcs.limit(self,min,max)
 		self.y < min.y and min.y or (self.y > max.y and max.y or self.y),
 		true
 		)
+end
+
+function _VECTOR.funcs.unpack(self)
+	return self[1],self[2]
 end
 
 function _VECTOR.funcs.del(self)
@@ -360,6 +364,7 @@ end]]--
 
 local function ret(...)
 	local args={...}
+	_G._VECTOR = _VECTOR
 	for i,v in ipairs(args) do
 		if type(v)=='string' then
 			_G[v]=_VECTOR
@@ -370,3 +375,22 @@ local function ret(...)
 	return _VECTOR
 end
 return ret
+
+--[[
+A bit of code for a modified json lib, here for later use.
+
+json.encoders.vector = function(val,op)
+  --return "<"..val.x..","..val.y..">"
+  return "{\"type\":\"vector\",\"x\":"..val.x..",\"y\":"..val.y.."}"
+end
+json.groks.vector = function(text,start,options)
+  if text:find('^<', start) then
+    local x = text:match('^-?%d*[%.]?%d*', start+1)
+    local y = text:match('^-?%d*[%.]?%d*', start+x:len()+2)
+    return Vec(tonumber(x),tonumber(y)),start+x:len()+2+y:len()+1
+  end
+end
+json.decoders.vector = function(val)
+  return (Vec(val.x,val.y))
+end
+]]--

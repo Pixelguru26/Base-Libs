@@ -374,6 +374,7 @@ setmetatable(_LINE,_LINE.meta)
 
 local function ret(...)
 	local args={...}
+  _G._LINE = _LINE
 	for i,v in ipairs(args) do
 		if type(v)=='string' then
 			_G[v]=_LINE

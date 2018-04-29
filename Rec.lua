@@ -250,6 +250,9 @@ _RECTANGLE.data={}
 		local v = self:regressB(vec)
 		return v.x+v.y*math.floor(area.w/self.w)
 	end
+	function _RECTANGLE.unpack(self)
+		return self[1],self[2],self[3],self[4]
+	end
 
 function _RECTANGLE.__index(t,k)
 	if type(_RECTANGLE[k])=='function' and _RECTANGLE.data[k] then
@@ -301,6 +304,7 @@ setmetatable(_RECTANGLE,_RECTANGLE.meta)
 
 local function ret(...)
 	local args={...}
+	_G._RECTANGLE = _RECTANGLE
 	for i,v in ipairs(args) do
 		if type(v)=='string' then
 			_G[v]=_RECTANGLE
@@ -311,3 +315,16 @@ local function ret(...)
 	return _RECTANGLE
 end
 return ret
+
+--[[
+--A bit of code for a modified json lib, stored here for future potential.
+
+json.encoders.rectangle = function(val,op)
+  return "{\"type\":\"rectangle\",\"x\":"..val.x..",\"y\":"..val.y..",\"w\":"..val.w..",\"h\":"..val.h.."}"
+end
+json.decoders.rectangle = function(val)
+  local x,y,w,h = val.x,val.y,val.w,val.h
+  val.x,val.y,val.w,val.h = nil,nil,nil,nil
+  return (Rec(x,y,w,h,val))
+end
+]]--
