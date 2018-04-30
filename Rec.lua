@@ -90,6 +90,7 @@ _RECTANGLE.data={}
 	end
 	_RECTANGLE.MY=_RECTANGLE.my
 -- corners
+	-- top left
 	function _RECTANGLE.pos(v,iv)
 		if iv then
 			v.x=iv.x
@@ -99,6 +100,7 @@ _RECTANGLE.data={}
 		end
 	end
 	_RECTANGLE.pos1 = _RECTANGLE.pos
+	-- top right
 	function _RECTANGLE.pos2(v,iv)
 		if iv then
 			v.r=iv.x
@@ -106,6 +108,7 @@ _RECTANGLE.data={}
 		end
 		return Vec(v.r,v.y)
 	end
+	-- bottom right
 	function _RECTANGLE.pos3(v,iv)
 		if iv then
 			v.r=iv.x
@@ -113,6 +116,7 @@ _RECTANGLE.data={}
 		end
 		return Vec(v.r,v.b)
 	end
+	-- bottom left
 	function _RECTANGLE.pos4(v,iv)
 		if iv then
 			v.x=iv.x

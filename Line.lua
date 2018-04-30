@@ -249,6 +249,9 @@ end
 function _LINE.isVert(self)
   return self.a.x == self.b.x
 end
+function _LINE.isHoriz(self)
+  return self.a.y == self.b.y
+end
 function _LINE.parallel(self,other)
   return self.m == other.m
 end
@@ -257,31 +260,57 @@ function _LINE.intersectX(self,other)
 end
 function _LINE.intersect(self,other)
   -- AABB culling
-  if self.x<=other.x1 and self.x1>=other.x and self.y<=other.y1 and self.y1>=other.y then
+  if self.x1<=other.x2 and self.x2>=other.x1 and self.y1<=other.y2 and self.y2>=other.y1 then
     -- easy checking of parallel lines
     if self.m == other.m then
       if self:solveY(other.a.x)==other.a.y then
-        return true
+        return true,"parallel"
       else
-        return false
+        return false,"parallel"
       end
     end
-    -- if either one is vertical, then they must be intersecting according to AABB.
+    -- A simplification with verticals
     if self:isVert() then
-      return true,self.a.x,other:solveY(self.a.x)
+      local y = other:solveY(self.a.x)
+      if y>=self.y1 and y<=self.y2 then
+        return true,self.a.x,y,"self vertical, in range"
+      else
+        return false,"self vertical, out of range"
+      end
     elseif other:isVert() then
-      return true,other.a.x,self:solveY(other.a.x)
+      local y = self:solveY(other.a.x)
+      if y>=other.y1 and y<=other.y2 then
+        return true,other.a.x,y,"other vertical, in range"
+      else
+        return false,"other vertical, out of range"
+      end
+    end
+    -- A simplification with horizontals
+    if self:isHoriz() then
+      local x = other:solveX(self.a.y)
+      if x>=self.x1 and x<=self.x2 then
+        return true,x,self.a.y,"self horizontal, in range"
+      else
+        return false,"self horizontal, out of range"
+      end
+    elseif other:isHoriz() then
+      local x = self:solveX(other.a.y)
+      if x>=other.x1 and x<=other.x2 then
+        return true,x,other.a.y,"other horizontal, in range"
+      else
+        return false,"other horizontal, out of range"
+      end
     end
     -- a more precise check
     local ix = self:intersectX(other)
     --print(self:solveY(ix),other:solveY(ix))
     if self:solveY(ix)==other:solveY(ix) and self:hasX(ix) and other:hasX(ix) then
-      return true,ix,self:solveY(ix)
+      return true,ix,self:solveY(ix),"solved"
     else
-      return false
+      return false,"unsolved"
     end
   else
-    return false
+    return false,"AABB excluded"
   end
 end
 function _LINE.normal(self,dir,dist)
@@ -321,6 +350,15 @@ function _LINE.unpack(self)
 	return self.a.x,self.a.y,self.b.x,self.b.y
 end
 
+function _LINE.fromRec(rec)
+  local l,r,t,b = rec[1],rec[1]+rec[3],rec[2],rec[2]+rec[4]
+  return 
+    _LINE(l,t,r,t), -- top
+    _LINE(r,t,r,b), -- right
+    _LINE(l,b,r,b), -- bottom
+    _LINE(l,t,l,b) -- left
+end
+
 function _LINE.del(self)
 	table.insert(_CACHE,self)
 	_CACHE.C = _CACHE.C + 1
@@ -350,6 +388,9 @@ function _LINE.__newindex(t,k,v)
   else
     rawset(t,k,v)
   end
+end
+function _LINE.__tostring(t)
+  return '<'..t.a.x..','..t.a.y..'>,<'..t.b.x..','..t.b.y..'>'
 end
 
 function _LINE.meta.__call(t,x0,y0,x1,y1)

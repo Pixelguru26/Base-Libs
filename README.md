@@ -189,6 +189,7 @@ The following methods are also supported:
 * `line:hasY(y)` returns true if the line extends through (or ends at) the given y
 * `line:hasPoint(x,y)` returns true if the line includes or ends at the given coordinates
 * `line:isVert()` returns true if the line is vertical
+* `line:isHoriz()` returns true if the line is horizontal
 * `line:parallel(line2)` returns true if the lines' slopes are equal
 * `line:intersectX(line2)` Apparently returns the x coordinate of intersection *if* there is a proper intersection; I have no memory, TODO.
 * `line:intersect(line2)` returns true if intersecting, then x and y of intersection.
@@ -198,6 +199,7 @@ The following methods are also supported:
 * `line:perpB()` returns a perpendicular line intersecting on B
 * `line:perpM()` returns a perpendicular line intersecting in the middle
 * `line:unpack()` returns ax, ay, bx, by
+* `line.fromRec(rec)` returns sides of a rectangle - top, right, bottom, left - as lines
 
 * `line:del()` recycles the line as above.
 
