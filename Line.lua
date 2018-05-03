@@ -352,11 +352,28 @@ end
 
 function _LINE.fromRec(rec)
   local l,r,t,b = rec[1],rec[1]+rec[3],rec[2],rec[2]+rec[4]
-  return 
-    _LINE(l,t,r,t), -- top
-    _LINE(r,t,r,b), -- right
-    _LINE(l,b,r,b), -- bottom
-    _LINE(l,t,l,b) -- left
+  if rec.dir == "tl" then
+    return _LINE(l,b,r,t),
+      _LINE(r,t,r,b),
+      _LINE(r,b,l,b)
+  elseif rec.dir == "tr" then
+    return _LINE(l,t,r,b),
+      _LINE(r,b,l,b),
+      _LINE(l,b,l,t)
+  elseif rec.dir == "br" then
+    return _LINE(l,t,r,t),
+      _LINE(r,t,l,b),
+      _LINE(l,b,l,t)
+  elseif rec.dir == "bl" then
+    return _LINE(l,t,r,t),
+      _LINE(r,t,r,b),
+      _LINE(r,b,l,t)
+  else
+    return _LINE(l,t,r,t), -- top
+      _LINE(r,t,r,b), -- right
+      _LINE(l,b,r,b), -- bottom
+      _LINE(l,t,l,b) -- left
+  end
 end
 
 function _LINE.del(self)

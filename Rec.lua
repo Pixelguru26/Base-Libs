@@ -9,8 +9,9 @@ end
 
 local Vec=assert(_VECTOR or safeRequire("Vec","lib/Vec","libs/Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
 if type(Vec)=="function" then Vec = Vec() end
+local Line = _LINE or safeRequire("Line","lib/Line","libs/Line")
 
-local _RECTANGLE={0,0,0,0,type="rectangle",_CACHE={}}
+local _RECTANGLE={0,0,0,0,type="rectangle",_CACHE={C=0}}
 local _CACHE = _RECTANGLE._CACHE
 
 _RECTANGLE.x=1
@@ -94,35 +95,70 @@ _RECTANGLE.data={}
 	function _RECTANGLE.pos(v,iv)
 		if iv then
 			v.x=iv.x
-			v.y=iv.y
+			if v.dir=="tl" then
+				v.b=iv.y
+			else
+				v.y=iv.y
+			end
 		else
-			return Vec(v.x,v.y)
+			if v.dir=="tl" then
+				return Vec(v.x,v.b)
+			else
+				return Vec(v.x,v.y)
+			end
 		end
 	end
 	_RECTANGLE.pos1 = _RECTANGLE.pos
 	-- top right
 	function _RECTANGLE.pos2(v,iv)
 		if iv then
-			v.r=iv.x
-			v.y=iv.y
+			v.r = iv.r
+			if v.dir=="tr" then
+				v.b=iv.y
+			else
+				v.y=iv.y
+			end
+		else
+			if v.dir=="tr" then
+				return Vec(v.r,v.b)
+			else
+				return Vec(v.r,v.y)
+			end
 		end
-		return Vec(v.r,v.y)
 	end
 	-- bottom right
 	function _RECTANGLE.pos3(v,iv)
 		if iv then
 			v.r=iv.x
-			v.b=iv.y
+			if v.dir=="br" then
+				v.y=iv.y
+			else
+				v.b=iv.y
+			end
+		else
+			if v.dir=="br" then
+				return Vec(v.r,v.y)
+			else
+				return Vec(v.r,v.b)
+			end
 		end
-		return Vec(v.r,v.b)
 	end
 	-- bottom left
 	function _RECTANGLE.pos4(v,iv)
 		if iv then
-			v.x=iv.x
-			v.b=iv.y
+			v.x = iv.x
+			if v.dir=="bl" then
+				v.y=iv.y
+			else
+				v.b=iv.y
+			end
+		else
+			if v.dir=="bl" then
+				return Vec(v.x,v.y)
+			else
+				return Vec(v.x,v.b)
+			end
 		end
-		return Vec(v.x,v.b)
 	end
 	function _RECTANGLE.pos5(v,iv)
 		if iv then
@@ -131,6 +167,7 @@ _RECTANGLE.data={}
 		end
 		return Vec(v.mx,v.my)
 	end
+
 -- other??
 	function _RECTANGLE.dims(v,iv)
 		if iv then
@@ -139,12 +176,68 @@ _RECTANGLE.data={}
 		end
 		return Vec(v.w,v.h)
 	end
+
+	function _RECTANGLE.slope(v)
+		if _LINE then
+			if v.dir then
+				if v.dir == "tl" then
+					return _LINE(v[1],v[2]+v[4],v[1]+v[3],v[2])
+				elseif v.dir == "tr" then
+					return _LINE(v[1],v[2],v[1]+v[3],v[2]+v[4])
+				elseif v.dir == "br" then
+					return _LINE(v[1]+v[3],v[2],v[1],v[2]+v[4])
+				elseif v.dir == "bl" then
+					return _LINE(v[2]+v[4],v[1],v[2],v[1]+v[3])
+				end
+			end
+		else
+			error("Line.lua not found or added, it is a requirement for slope()!")
+		end
+	end
 	-- end of properties
 		for k,v in pairs(_RECTANGLE) do
 			_RECTANGLE.data[k]=v
 		end
 	-- ==========================================
 	_RECTANGLE.type="rectangle"
+	function _RECTANGLE.sPos(v,i)
+		i = i%4+1
+		if v.dir=="tl" then
+			if i==1 then return Vec(v.x,v.b)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.r,v.b)
+			end
+		elseif v.dir=="tr" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.b)
+			elseif i==3 then return Vec(v.x,v.b)
+			end
+		elseif v.dir=="br" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.x,v.b)
+			end
+		elseif v.dir=="bl" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.r,v.b)
+			end
+		end
+	end
+	function _RECTANGLE.sPosList(v)
+		return {v:sPos(1),v:sPos(2),v:sPos(3)}
+	end
+	function _RECTANGLE.corner(v,i)
+		i = i%5+1
+		if i==1 then return Vec(v.x,v.y)
+		elseif i==2 then return Vec(v.r,v.y)
+		elseif i==3 then return Vec(v.r,v.b)
+		elseif i==4 then return Vec(v.x,v.b)
+		end
+	end
+	function _RECTANGLE.corners(v)
+		return {Vec(v.x,v.y),Vec(v.r,v.y),Vec(v.r,v.b),Vec(v.x,v.b)}
+	end
 	function _RECTANGLE.intersect(v,iv)
 		return(	v.r>=iv.l and
 				v.l<=iv.r and
@@ -258,6 +351,10 @@ _RECTANGLE.data={}
 		return self[1],self[2],self[3],self[4]
 	end
 
+function _RECTANGLE.loadLine(_LINE)
+	line = _LINE or _G.LINE
+end
+
 function _RECTANGLE.__index(t,k)
 	if type(_RECTANGLE[k])=='function' and _RECTANGLE.data[k] then
 		return _RECTANGLE[k](t)
@@ -290,7 +387,14 @@ end
 
 function _RECTANGLE.meta.__call(t,x,y,w,h,v)
 	--print(t,x,y,w,h,v)
-	v = v or table.remove(_CACHE,#_CACHE) or {}
+	local v = v or nil
+	if not v and _CACHE.C>0 then
+		v=table.remove(_CACHE,_CACHE.C)
+		v.dir = nil
+		_CACHE.C = _CACHE.C-1
+	elseif not v then
+		v = {}
+	end
 	v[1] = x
 	v[2] = y
 	v[3] = w
@@ -299,10 +403,10 @@ function _RECTANGLE.meta.__call(t,x,y,w,h,v)
 end
 
 function _RECTANGLE.del(v)
-	table.insert(_CACHE,v)
+	_CACHE.C = _CACHE.C + 1
+	_CACHE[_CACHE.C] = v
 	return v
 end
-
 
 setmetatable(_RECTANGLE,_RECTANGLE.meta)
 

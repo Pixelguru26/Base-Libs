@@ -118,7 +118,6 @@ Rectangle objects support the following properties, which can be both read and w
 * `rec.mx` the middle x coordinate of the rectangle - returns x + w/2, sets x (with offset of w/2)
 * `rec.my` the middle y coordinate of the rectangle - returns y + h/2, sets y (with offset of h/2)
 * `rec.pos` the top left vector of the rectangle (in inv y)
-* `rec.pos` the top left vector of the rectangle (in inv y)
 * `rec.pos1` the top left vector of the rectangle (in inv y)
 * `rec.pos2` the top right vector of the rectangle (in inv y)
 * `rec.pos3` the bottom right vector of the rectangle (in inv y)
@@ -126,6 +125,7 @@ Rectangle objects support the following properties, which can be both read and w
 * `rec.pos5` the middle vector of the rectangle
 * `rec.dims` the dimensions of the rectangle in vector form
 
+*Note: the 'pos' components should support slope directions, though it will result in some duplicates. For non duplicate positions, see sPos*
 The following methods are, of course, read-only:
 
 >* `rec:intersect(rec2)` AABB true/false intersection check
@@ -138,11 +138,33 @@ The following methods are, of course, read-only:
 * `rec:copy(dx,dy,dw,dh,mod)` copies rec. Will apply deltas if given, will copy unofficial values into `mod` if given a table, and will use the `mod` table rather than create or recycle a new one.
 * `rec:multiply(val)` multiplies all values in rec by val, returns a new rectangle with the result.
 * `for v in rec:iter(rec2)` iterates rec2 through rec in "stamp" fashion. Developed for use in grid/list-style menus. V is the rectangle representing the current space.
-* `rec:regressB(vec)` I'll... update this as soon as I actually remember what the heck this is for...
-* `rec:regress(rec2,vec)` This too.
+* `rec:sPos(i)` returns corner vector `i` with slope support - i being an integer from 1 to 3
+* `rec:sPosList()` returns a list of the corner vectors with slope support
+* `rec:corner(i)` returns the `i`th corner of the rectangle without slope support.
+* `rec:corners()` returns a list of the corners of the rectangle without slope support.
+* `rec:regressB(vec)` regresses the given position - returns the integer index of the position on that row.
+* `rec:regress(rec2,vec)` regresses the given position, using the rectangle to define cell size.
 * `rec:unpack()` returns the top left x, top left y, width, and height of the box.
 
 >* `rec:del()` recycles rec in similar fashion to the Vec library
+
+The library is designed to natively support basic slopes for tiles, considering the component `rec.dir` - an enum with the four possible states of `"tl"`, `"tr"`, `"br"`, and `"bl"` - to be generally reserved and reset after recycling. However, it cannot be set in the constructor without a properties table. An example of both options:
+
+```lua
+local A = rec(10,20,30,40,{dir = "tl"}) -- A top-left facing slope.
+local B = rec(10,20,30,40) -- A basic rectangle...
+B.dir = "tl" -- ...with a top-left facing slope.
+```
+
+Both are roughly equivalent, though the first form will create a new table for every slope, while the second will attempt to make use of the recycling cache.
+
+Rec.lua can also integrate Line.lua for some added features. It will automatically require/load Line if available; however, it is also possible to manually load Line.lua later:
+
+>* `rec.loadLine(_LINE)` the library object or any returned rectangle contain this function.
+
+This unlocks the following function:
+
+>* `rec.slope` returns a line representation of a slope, or nil if it is not a slope.
 
 Line.lua
 ---
