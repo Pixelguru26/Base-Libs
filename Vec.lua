@@ -94,7 +94,7 @@ end
 	function _VECTOR.__concat(a,b) -- DOT PRODUCT
 	    if type(a)=='table' and type(b)=='table' then
 	    	local al = a.l
-	    	return(a.x/a.l*b.x+a.y/a.l*b.y)
+	    	return(a.x/al*b.x+a.y/al*b.y)
 	    end
 	end
 
@@ -283,7 +283,7 @@ function _VECTOR.funcs.unVol(self)
 	return self
 end
 function _VECTOR.funcs.QUVol(self)
-	if _VOLATILES.C == self then
+	if _VOLATILES[_VOLATILES.C] == self then
 		_VOLATILES[_VOLATILES.C] = nil
 		_VOLATILES.C = _VOLATILES.C - 1
 		return self
