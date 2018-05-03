@@ -312,7 +312,7 @@ function _VECTOR.funcs.dec(self,other)
 	end
 	return self
 end
-_VECTOR.funcs.sub = _VECTOR.funcs.inc
+_VECTOR.funcs.sub = _VECTOR.funcs.dec
 function _VECTOR.funcs.mul(self,other)
 	if type(other)~="table" then
 		self[1] = self[1] * other
