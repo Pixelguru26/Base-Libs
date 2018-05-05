@@ -14,6 +14,12 @@ local _CACHE = _LINE._CACHE
 _LINE.aliases = {}
 _LINE.meta = {}
 
+-- localization optimization
+local sqrt = math.sqrt
+local atan2 = math.atan2
+local cos = math.cos
+local sin = math.sin
+
 -- ========================================== Utils
 
 local function min(a,b)
@@ -214,19 +220,21 @@ end
 -- crazy shit like angles
 function _LINE.aliases.angle(t,v)
   if v then
-    
+    local l = t.length
+    t.b.x = cos(v)*l
+    t.b.y = sin(v)*l
   else
-    return math.atan2(t.dy,t.dx)
+    return atan2(t.dy,t.dx)
   end
 end
 function _LINE.aliases.length(t,v)
   if v then
-    local l = math.sqrt(t.dx*t.dx+t.dy*t.dy)
+    local l = sqrt(t.dx*t.dx+t.dy*t.dy)
     local ratio = v/l
     t.b.x = t.a.x + (t.b.x-t.a.x)*ratio
     t.b.y = t.a.y + (t.b.y-t.a.y)*ratio
   else
-    return math.sqrt(t.dx*t.dx+t.dy*t.dy)
+    return sqrt(t.dx*t.dx+t.dy*t.dy)
   end
 end
 -- ========================================== Methods
@@ -316,7 +324,7 @@ end
 function _LINE.normal(self,dir,dist)
   dir = dir or 'r'
   dist = dist or 1
-  local angle = math.atan2(self.dy,self.dx)
+  local angle = atan2(self.dy,self.dx)
   if dir=='l' then
     angle = angle - math.pi/2
   else
@@ -324,7 +332,7 @@ function _LINE.normal(self,dir,dist)
   end
   local ax = self.mx
   local ay = self.my
-  return _LINE(ax,ay,ax+math.cos(angle)*dist,ay+math.sin(angle)*dist)
+  return _LINE(ax,ay,ax+cos(angle)*dist,ay+sin(angle)*dist)
 end
 function _LINE.mir(self,x,y)
   if type(x)~="table" then
@@ -338,16 +346,88 @@ function _LINE.mir(self,x,y)
   end
 end
 function _LINE.perpA(self)
-  return _LINE(self.a.x,self.a.y,self.a.x+self.dy,self.a.y-self.dx)
+  return _LINE(self.a.x,self.a.y,self.a.x-self.dy,self.a.y+self.dx)
 end
 function _LINE.perpB(self)
-  return _LINE(self.b.x,self.b.y,self.b.x+self.dy,self.b.y-self.dx)
+  return _LINE(self.b.x,self.b.y,self.b.x-self.dy,self.b.y+self.dx)
 end
 function _LINE.perpM(self)
-  return _LINE(self.mx,self.my,self.mx+self.dy,self.my-self.dx)
+  return _LINE(self.mx,self.my,self.mx-self.dy,self.my+self.dx)
 end
 function _LINE.unpack(self)
 	return self.a.x,self.a.y,self.b.x,self.b.y
+end
+
+function _LINE.projVec(self,v,getVec)
+  local temp = v - self.a
+  local delta = Vec(self.dx,self.dy)
+  local dist = temp..delta
+  temp:del()
+  local n = getVec and delta.n:del()
+  delta:del()
+  return dist,getVec and Vec(dist*n.x+self.a.x,dist*n.y+self.a.y)
+end
+function _LINE.projNormA(self,v,getVec,left)
+  local temp = v - self.a
+  local delta = left and Vec(self.dy,-self.dx) or Vec(-self.dy,self.dx)
+  local dist = temp..delta
+  temp:del()
+  local n = getVec and delta.n:del()
+  delta:del()
+  return dist,getVec and Vec(dist*n.x+self.a.x,dist*n.y+self.a.y)
+end
+function _LINE.projNormB(self,v,getVec,left)
+  local temp = v - self.b
+  local delta = left and Vec(self.dy,-self.dx) or Vec(-self.dy,self.dx)
+  local dist = temp..delta
+  temp:del()
+  local n = getVec and delta.n:del()
+  delta:del()
+  return dist,getVec and Vec(dist*n.x+self.b.x,dist*n.y+self.b.y)
+end
+function _LINE.projNormM(self,v,getVec,left)
+  local temp = v - self.mid:del()
+  local delta = left and Vec(self.dy,-self.dx) or Vec(-self.dy,self.dx)
+  local dist = temp..delta
+  temp:del()
+  local n = getVec and delta.n:del()
+  delta:del()
+  return dist,getVec and Vec(dist*n.x+self.mx,dist*n.y+self.my)
+end
+
+function _LINE.solveDist(self,v)
+  local length = self.length
+  return Vec(v*self.dx/length+self.a.x,v*self.dy/length+self.a.y)
+end
+function _LINE.solveNormADist(self,v,left)
+  local length = self.length
+  return left and Vec(v*self.dy/length+self.a.x,v*(-self.dx/length)+self.a.y) or Vec(v*(-self.dy/length)+self.a.x,v*self.dx/length+self.a.y)
+end
+function _LINE.solveNormBDist(self,v,left)
+  local length = self.length
+  return left and Vec(v*self.dy/length+self.b.x,v*(-self.dx/length)+self.b.y) or Vec(v*(-self.dy/length)+self.b.x,v*self.dx/length+self.b.y)
+end
+function _LINE.solveNormMDist(self,v,left)
+  local length = self.length
+  return left and Vec(v*self.dy/length+self.mx,v*(-self.dx/length)+self.my) or Vec(v*(-self.dy/length)+self.mx,v*self.dx/length+self.my)
+end
+
+function _LINE.SATPoint(self,point,left)
+  local dist = self:projNormA(v,false,left)
+  return dist<=0, dist
+end
+function _LINE.SATPoints(self,points,left)
+  local minimum = self:projNormA(points[1],false,left)
+  local minI = 1
+  for i = 2,#points do
+    local v = points[i]
+    local dist = self:projNormA(v,false,left)
+    if dist < minimum then
+      minimum = dist
+      minI = i
+    end
+  end
+  return minimum<=0, minI, minimum
 end
 
 function _LINE.fromRec(rec)

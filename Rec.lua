@@ -201,7 +201,7 @@ _RECTANGLE.data={}
 	-- ==========================================
 	_RECTANGLE.type="rectangle"
 	function _RECTANGLE.sPos(v,i)
-		i = i%4+1
+		i = (i-1)%3+1
 		if v.dir=="tl" then
 			if i==1 then return Vec(v.x,v.b)
 			elseif i==2 then return Vec(v.r,v.y)
@@ -228,7 +228,7 @@ _RECTANGLE.data={}
 		return {v:sPos(1),v:sPos(2),v:sPos(3)}
 	end
 	function _RECTANGLE.corner(v,i)
-		i = i%5+1
+		i = (i-1)%4+1
 		if i==1 then return Vec(v.x,v.y)
 		elseif i==2 then return Vec(v.r,v.y)
 		elseif i==3 then return Vec(v.r,v.b)

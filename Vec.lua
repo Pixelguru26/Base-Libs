@@ -10,6 +10,11 @@ _VECTOR.W=1
 _VECTOR.h=2
 _VECTOR.H=2
 
+-- localization for optimization
+local sqrt = math.sqrt
+local atan2 = math.atan2
+local abs = math.abs
+
 _VECTOR.meta={}
 local x,y
 function _VECTOR.__index(t,k)
@@ -91,7 +96,7 @@ end
 	        return _VECTOR(b.x^a,b.y^a,true)
 	    end
 	end
-	function _VECTOR.__concat(a,b) -- DOT PRODUCT
+	function _VECTOR.__concat(b,a) -- DOT PRODUCT
 	    if type(a)=='table' and type(b)=='table' then
 	    	local al = a.l
 	    	return(a.x/al*b.x+a.y/al*b.y)
@@ -100,8 +105,7 @@ end
 
 -- general
 	function _VECTOR.__tostring(v)
-	    local r={'<',v.x,',',v.y,'>'}
-	    return table.concat(r)
+	    return '<'..v.x..','..v.y..'>'
 	end
 
 	function _VECTOR.__eq(a,b)
@@ -131,7 +135,7 @@ end
 
 	-- Vector angle
 	function _VECTOR.a(t)
-		return math.atan2(t.y,t.x)
+		return atan2(t.y,t.x)
 	end
 	_VECTOR.A=_VECTOR.a
 
@@ -143,7 +147,7 @@ end
 		else
 			return t.y/math.sin(a)
 		end]]--
-		return math.sqrt(t.x*t.x+t.y*t.y)
+		return sqrt(t.x*t.x+t.y*t.y)
 	end
 	_VECTOR.L=_VECTOR.l
 
@@ -178,7 +182,7 @@ end
 	_VECTOR.REVERSE=_VECTOR.r
 
 	function _VECTOR.abs(v)
-		return _VECTOR(math.abs(v.x),math.abs(v.y),true)
+		return _VECTOR(abs(v.x),abs(v.y),true)
 	end
 	_VECTOR.Abs=_VECTOR.abs
 	_VECTOR.ABS=_VECTOR.abs
@@ -186,10 +190,15 @@ end
 	_VECTOR.Absolute=_VECTOR.abs
 	_VECTOR.ABSOLUTE=_VECTOR.abs
 
+	function _VECTOR.proj(x1,y1,x2,y2)
+		local al = sqrt(x1*x1+y1*y1)
+    	return(x1/al*x2+y1/al*y1)
+	end
+
 	function _VECTOR.funcs.dist(self,other)
 		x = other.x-self.x
 		y = other.y-self.y
-		return math.sqrt(x*x+y*y)
+		return sqrt(x*x+y*y)
 	end
 
 	function _VECTOR.funcs.copy(self,a,b)

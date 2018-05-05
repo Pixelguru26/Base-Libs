@@ -217,9 +217,19 @@ The following methods are also supported:
 * `line:intersect(line2)` returns true if intersecting, then x and y of intersection.
 * `line:normal(dir,dist)` returns a right normal with a distance of one by default. If dir is 'l', will return a left normal. If dist is supplied, will use that.
 * `line:mir(x,y)` `line:mir(vec)` reflects the coordinates about the line. Returns type in kind with input.
-* `line:perpA()` returns a perpendicular line intersecting on A
-* `line:perpB()` returns a perpendicular line intersecting on B
-* `line:perpM()` returns a perpendicular line intersecting in the middle
+* `line:perpA()` returns a perpendicular line intersecting on A.
+* `line:perpB()` returns a perpendicular line intersecting on B.
+* `line:perpM()` returns a perpendicular line intersecting in the middle.
+* `line:projVec(v,getVec)` projects the given vector onto the line, returns distance and, if getVec is true, the vector of the projected location.
+* `line:projNormA(v,getVec,left)` projects onto the right normal of the line (at line.a) by default, left normal if left is true.
+* `line:projNormB(v,getVec,left)` projects onto the right normal of the line (at line.b) by default, left normal if left is true.
+* `line:projNormM(v,getVec,left)` projects onto the right normal of the line (at line.mid) by default, left normal if left is true.
+* `line:solveDist(v)` solves for the point at a distance of `v` along the line, returns the vector location.
+* `line:solveNormADist(v,left)` solves for the point at a distance of `v` along the A normal of the line - right by default, left when given arg.
+* `line:solveNormBDist(v,left)` solves for the point at a distance of `v` along the B normal of the line - right by default, left when given arg.
+* `line:solveNormMDist(v,left)` solves for the point at a distance of `v` along the middle normal of the line - right by default, left when given arg.
+* `line:SATPoint(v,left)` returns true if the sent vector is behind the line (negative on right normal, unless 'left' is true) and the distance on the projection.
+* `line:SATPoints(points,left)` returns true if the minimum point is behind the line, then the minimum index and value. `points` should be an array of vectors.
 * `line:unpack()` returns ax, ay, bx, by
 * `line.fromRec(rec)` returns sides of a rectangle - top, right, bottom, left - as lines
 
