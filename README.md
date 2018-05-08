@@ -140,8 +140,12 @@ The following methods are, of course, read-only:
 * `for v in rec:iter(rec2)` iterates rec2 through rec in "stamp" fashion. Developed for use in grid/list-style menus. V is the rectangle representing the current space.
 * `rec:sPos(i)` returns corner vector `i` with slope support - i being an integer from 1 to 3
 * `rec:sPosList()` returns a list of the corner vectors with slope support
+* `rec:aPos(i)` returns the corner vector `i` with slope *and* basic support
 * `rec:corner(i)` returns the `i`th corner of the rectangle without slope support.
 * `rec:corners()` returns a list of the corners of the rectangle without slope support.
+* `rec:SATIntersect(other)` returns whether or not the two rectangles are intersecting using the Separating Axis Theorem.
+* `rec:SATNearest(other,getDelta,getImpact)` returns basic information for SAT physics between slopes: isIntersecting, nearestSideIndex, nearestPointIndex, nearestDistance, Delta/Impact, Impact/nil (the last two dependant on the given arguments)
+* `rec:SATExpel(other,getDelta)` expels rec from other with slope and basic support. If getDelta is true, returns delta of SATNearest.
 * `rec:regressB(vec)` regresses the given position - returns the integer index of the position on that row.
 * `rec:regress(rec2,vec)` regresses the given position, using the rectangle to define cell size.
 * `rec:unpack()` returns the top left x, top left y, width, and height of the box.
@@ -230,8 +234,10 @@ The following methods are also supported:
 * `line:solveNormMDist(v,left)` solves for the point at a distance of `v` along the middle normal of the line - right by default, left when given arg.
 * `line:SATPoint(v,left)` returns true if the sent vector is behind the line (negative on right normal, unless 'left' is true) and the distance on the projection.
 * `line:SATPoints(points,left)` returns true if the minimum point is behind the line, then the minimum index and value. `points` should be an array of vectors.
+* `line:SATPointsRec(rectangle,left)` returns SAT data of a rectangle's points. Returns intersecting, nearestPointIndex, nearestDistance
 * `line:unpack()` returns ax, ay, bx, by
 * `line.fromRec(rec)` returns sides of a rectangle - top, right, bottom, left - as lines
+* `line.fromRecI(rec,i)` returns the `i`th side of a rectangle as a line.
 
 * `line:del()` recycles the line as above.
 

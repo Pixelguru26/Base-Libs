@@ -419,13 +419,32 @@ end
 function _LINE.SATPoints(self,points,left)
   local minimum = self:projNormA(points[1],false,left)
   local minI = 1
+  local v,dist
   for i = 2,#points do
-    local v = points[i]
-    local dist = self:projNormA(v,false,left)
+    v = points[i]
+    dist = self:projNormA(v,false,left)
     if dist < minimum then
       minimum = dist
       minI = i
     end
+  end
+  return minimum<=0, minI, minimum
+end
+function _LINE.SATPointsRec(self,rec,left)
+  local points = rec.dir and rec.sPos or rec.corner
+  local point = points(rec,1)
+  local minimum = self:projNormA(point,false,left)
+  point:del()
+  local minI = 1
+  local v,dist
+  for i = 2,rec.dir and 3 or 4 do
+    v = points(rec,i)
+    dist = self:projNormA(v,false,left)
+    if dist < minimum then
+      minimum = dist
+      minI = i
+    end
+    v:del()
   end
   return minimum<=0, minI, minimum
 end
@@ -454,6 +473,9 @@ function _LINE.fromRec(rec)
       _LINE(l,b,r,b), -- bottom
       _LINE(l,t,l,b) -- left
   end
+end
+function _LINE.fromRecI(rec,i)
+  return _LINE(rec:aPos(i),rec:aPos(i+1))
 end
 
 function _LINE.del(self)

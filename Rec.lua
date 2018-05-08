@@ -235,6 +235,36 @@ _RECTANGLE.data={}
 		elseif i==4 then return Vec(v.x,v.b)
 		end
 	end
+	function _RECTANGLE.aPos(v,i)
+		i = (i-1)%(v.dir and 3 or 4)+1
+		if v.dir=="tl" then
+			if i==1 then return Vec(v.x,v.b)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.r,v.b)
+			end
+		elseif v.dir=="tr" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.b)
+			elseif i==3 then return Vec(v.x,v.b)
+			end
+		elseif v.dir=="br" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.x,v.b)
+			end
+		elseif v.dir=="bl" then
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.r,v.b)
+			end
+		else
+			if i==1 then return Vec(v.x,v.y)
+			elseif i==2 then return Vec(v.r,v.y)
+			elseif i==3 then return Vec(v.r,v.b)
+			elseif i==4 then return Vec(v.x,v.b)
+			end
+		end
+	end
 	function _RECTANGLE.corners(v)
 		return {Vec(v.x,v.y),Vec(v.r,v.y),Vec(v.r,v.b),Vec(v.x,v.b)}
 	end
@@ -275,6 +305,105 @@ _RECTANGLE.data={}
 			return 3,l1,r1,u1,d1
 		elseif d<l and d<r and d<u then
 			return 4,l1,r1,u1,d1
+		end
+	end
+	function _RECTANGLE.SATIntersect(self,other)
+		local within = true
+		for i = 1,self.dir and 3 or 4 do
+			local v = Line.fromRecI(self,i)
+			local within1 = v:SATPointsRec(other)
+			within = within and within1
+			v:del()
+		end
+		for i = 1,other.dir and 3 or 4 do
+			local v = Line.fromRecI(other,i)
+			local within1 = v:SATPointsRec(self)
+			within = within and within1
+		end
+		return within
+	end
+	function _RECTANGLE.SATNearest(self,other,getDelta,getImpact)
+		local within = true
+		local nearestSide,nearestPoint,nearest = 1,1,-math.huge
+		local point,impact
+		local within1,minI,minimum,v
+		local typeA = true
+		-- check other rectangle's points (this rec's perspective)
+		-- accurately determines nearest point and side
+		-- partially determines boolean
+		-- if this defines nearest, we have an intersection type A - dynamic corner into static side.
+		-- this means our impact is the dynamic corner, and the delta is a projection of the corner
+		-- onto the static side.
+		for i=1,other.dir and 3 or 4 do
+			v = Line.fromRecI(other,i)
+			within1,minI,minimum = v:SATPointsRec(self,true)
+			within = within and within1
+			if minimum > nearest then
+				nearestSide = i
+				nearestPoint = minI
+				nearest = minimum
+				typeA = true
+			end
+			v:del()
+		end
+		-- check this rectangle's points (other rec's perspective)
+		-- finishes determining boolean
+		-- if this defines nearest, we have a type B - static corner into dynamic side.
+		-- this means our impact is the static corner, and the delta is a projection of the corner
+		-- onto the dynamic side.
+		for i=1,self.dir and 3 or 4 do
+			v = Line.fromRecI(self,i)
+			within1,minI,minimum = v:SATPointsRec(other,true)
+			within = within and within1
+			if minimum > nearest then
+				nearestSide = i
+				nearestPoint = minI
+				nearest = minimum
+				typeA = false
+			end
+			v:del()
+		end
+		if within and typeA then
+			if getDelta then
+				local nearCorner = self:aPos(nearestPoint)
+				local _,point = Line.fromRecI(other,nearestSide):del():projVec(nearCorner,true)
+				delta = point-nearCorner
+				nearCorner:del()
+			end
+			if getImpact then
+				impact = self:aPos(nearestPoint)
+			end
+		elseif within then
+			if getDelta then
+				local nearCorner = other:aPos(nearestPoint)
+				local _,point = Line.fromRecI(self,nearestSide):del():projVec(nearCorner,true)
+				delta = nearCorner-point
+				nearCorner:del()
+			end
+			if getImpact then
+				impact = other:aPos(nearestPoint)
+			end
+		end
+		return within,
+			typeA,
+			nearestSide,
+			nearestPoint,
+			nearest,
+			(getDelta and delta) or (getImpact and impact),
+			(getImpact and getDelta and impact)
+	end
+	function _RECTANGLE.SATExpel(self,other,getDelta)
+		if self:intersect(other) then
+			local within,typeA,nearestSideI,nearestPointI,nearestDist,delta = self:SATNearest(other,true)
+			if within then
+				self.x = self.x + delta.x
+				self.y = self.y + delta.y
+				if getDelta then
+					return delta
+				else
+					delta:del()
+				end
+			end
 		end
 	end
 	function _RECTANGLE.expel(v,iv)
@@ -352,7 +481,7 @@ _RECTANGLE.data={}
 	end
 
 function _RECTANGLE.loadLine(_LINE)
-	line = _LINE or _G.LINE
+	Line = _LINE or _G.LINE
 end
 
 function _RECTANGLE.__index(t,k)
