@@ -363,6 +363,7 @@ function _VECTOR.funcs.mod(self,other)
 	return self
 end
 
+-- an old distance method I keep only for reference.
 --[[function dist(x1,y1,x2,y2)
 	if type(x1)=="table" then -- vec mode
 		return dist(x1.x,x1.y,y1.x,y1.y)

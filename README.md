@@ -55,15 +55,15 @@ The following functions and properties are also supported:
 * `vec:set(vec2)` copies the values of vec2 into vec
 * `vec:unpack()` returns the x and y components of the vector
 
-* `vec:del()` garbage recycling for vec; pushes vec onto the reuse stack for future vectors to save RAM.
+* `vec:del()` garbage recycling for vec; pushes vec onto the reuse stack for future vectors to save RAM. Returns the deleted vector, which is safe to use UNTIL another vector is created.
 
 A relatively recent feature, Volatiles, adds the ability to automatically queue vectors for recycling at a controlled time, thus mitigating the garbage pileup from struct math.
 (*`_VECTOR` refers to the library object itself*)
 
 >* `_VECTOR.volMode` A boolean setting. Default false. If true, all vectors are automatically marked as 'volatile' upon creation.
-* `_Vector.volMath` A boolean setting. Default false. If true, all results of vector math are marked as 'volatile' upon creation.
-* `_Vector.crunch()` Recycles all volatile vectors into the delqueue.
-* `_Vector.stepCrunch()` Slower per item than crunch(), but deletes only one item at a time. Should be safe for coroutines.
+* `_VECTOR.volMath` A boolean setting. Default false. If true, all results of vector math are marked as 'volatile' upon creation.
+* `_VECTOR.crunch()` Recycles all volatile vectors into the delqueue.
+* `_VECTOR.stepCrunch()` Slower per item than crunch(), but deletes only one item at a time. Should be safe for coroutines.
 * `vec:vol()` adds vec to the volatile queue.
 * `vec:unVol()` Removes vec from volatile queue. Searches from end to beginning, thus making it faster the fewer volatiles are created after vec. Will search entire queue if vec is not volatile, but will not cause any further problems.
 * `vec:QUVol()` Only use if you're certain no volatile vectors have been created since vec. Will simply pop the most recent item out of volatiles. Will do nothing if top item is not vec. (*i.e. if vec is not a volatile, or is not the last volatile created*)
