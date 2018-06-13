@@ -292,7 +292,7 @@ _RECTANGLE.data={}
 		return _RECTANGLE(x,y,w,h)
 	end
 	function _RECTANGLE.expelDir(v,iv)
-		local l1,r1,u1,d1 = unpack(v:relate(iv))
+		local l1,r1,u1,d1 = v:relate(iv)
 		l = math.abs(l1)
 		r = math.abs(r1)
 		u = math.abs(u1)
