@@ -249,6 +249,7 @@ Usage is as follows:
 
 ```lua
 local overLoad = require("OLoad")
+
 -- create an overloadable function:
 local overLoadedFunction = overLoad(
 	-- a function overload
@@ -259,6 +260,7 @@ local overLoadedFunction = overLoad(
 	{"number","string","table"},
 	-- repeat for every initial overload
 )
+
 -- add a version to an overloaded function:
 overLoadedFunction:add(
 	function(a,b,c)
@@ -267,6 +269,18 @@ overLoadedFunction:add(
 	{"string","table","number"}
 	-- 'add' can only handle one function at a time for now.
 )
+
+-- add a default version to the overloaded function:
+overLoadedFunction:add(
+	function(...)
+		local out = {}
+		for i,v in ipairs({...}) do
+			out[i] = type(v)
+		end
+		return unpack(out)
+	end
+)
+
 -- execute an overloaded function:
 print(
 	overLoadedFunction(1,"str",{}) -- calls the correct version of the function for the given arg types

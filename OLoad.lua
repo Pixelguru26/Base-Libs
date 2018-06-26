@@ -9,13 +9,18 @@ local function __call(t,...)
 			end
 		end
 		if execute then
-			version[1](...)
+			return version[1](...)
 		end
 	end
+	return t.default(...)
 end
 local function add(t,fn,args)
-	t.c = t.c + 1
-	t[t.c] = {fn,args}
+	if args then
+		t.c = t.c + 1
+		t[t.c] = {fn,args}
+	else
+		t.default = {fn,args}
+	end
 end
 local function def(...)
 	local args = {...}
