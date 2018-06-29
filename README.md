@@ -234,12 +234,45 @@ The following methods are also supported:
 >* `line:solveNormMDist(v,left)` solves for the point at a distance of `v` along the middle normal of the line - right by default, left when given arg.
 >* `line:SATPoint(v,left)` returns true if the sent vector is behind the line (negative on right normal, unless 'left' is true) and the distance on the projection.
 >* `line:SATPoints(points,left)` returns true if the minimum point is behind the line, then the minimum index and value. `points` should be an array of vectors.
->* `line:SATPointsRec(rectangle,left)` returns SAT data of a rectangle's points. Returns intersecting, nearestPointIndex, nearestDistance
->* `line:unpack()` returns ax, ay, bx, by
->* `line.fromRec(rec)` returns sides of a rectangle - top, right, bottom, left - as lines
+>* `line:SATPointsRec(rectangle,left)` returns SAT data of a rectangle's points. Returns intersecting, nearestPointIndex, nearestDistance.
+>* `line:unpack()` returns ax, ay, bx, by.
+>* `line.fromRec(rec)` returns sides of a rectangle - top, right, bottom, left - as lines.
 >* `line.fromRecI(rec,i)` returns the `i`th side of a rectangle as a line.
 
 >* `line:del()` recycles the line as above.
+
+Poly.lua
+---
+
+Poly.lua is a polygon class library designed in the fashion of Vec and Line. It requires Vec and Line to work, in the same fashion as Line and Rec. Poly is designed to provide basic utilities for general shapes, such as intersection, combination, subtraction, rotation, and even some raycasting utilities.
+It should be noted that polygon is designed primarily for 2d convex polygons, though it will include functions for decomposing concave 2d polygons.
+Complex or composite polygons, however - i.e. those with holes punched in the middle - are unlikely to be well-supported. 
+
+It is instantiated more or less as standard:
+
+```lua
+local poly = Poly(0,0,10,10,0,10)
+local poly = Line(Vec(0,0),Vec(10,10),Vec(0,10))
+```
+
+Either of these methods will produce a right 45-degree triangle with leg lengths of 10.
+
+Warning: Poly.lua is entirely new and still WIP. Precise documentation will not be included until a baseline functionality is achieved - however, the library will be accessible and will almost always at least compile during this time, though nothing is guaranteed.
+
+The polygon supports the following properties, similarly to the rectangle:
+
+>* `line.x` returns the minimum x coordinate of the polygon (set)
+>* `line.x1` alias of x
+>* `line.y` returns the minimum y coordinate of the polygon (set)
+>* `line.y1` alias of y
+>* `line.x2` returns the maximum x coordinate of the polygon (set)
+>* `line.y2` returns the maximum y coordinate of the polygon (set)
+
+The following methods are also supported:
+
+>* `poly:order()` sorts the vertices in clockwise order for convex polygons.
+
+>* `poly:del()` recycles the polygon as above.
 
 OLoad.lua
 ---

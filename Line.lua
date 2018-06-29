@@ -1,12 +1,22 @@
 local lib={name="Line"}
+local reqLocations = {"","lib/","libs/","Lib/","Libs/","Base-Libs/","BLibs/","BaseLibs/","base-libs/","blibs/","baselibs/"}
+for i = 6,#reqLocations do
+	for j=2,6 do
+		table.insert(reqLocations,reqLocations[j].."/"..reqLocations[i])
+	end
+end
 local function safeRequire(...)
-  for i,v in ipairs({...}) do
-    local success,val = pcall(function () return require(v) end)
-    if success then return val end
-  end
+	local v,success,val
+	for i=1,select('#',...) do
+		v = (select(i,...))
+		for ii,iv in ipairs(reqLocations) do
+			success,val = pcall(function () return require(iv..v) end)
+			if success then return val end
+		end
+	end
 end
 
-local Vec=assert(_VECTOR or safeRequire("Vec","lib/Vec","libs/Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
+local Vec=assert(_VECTOR or safeRequire("Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
 if type(Vec)=="function" then Vec = Vec() end
 
 local _LINE = {Vec(0,0),Vec(0,0),_CACHE={C=0}}
