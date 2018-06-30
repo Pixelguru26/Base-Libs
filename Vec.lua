@@ -214,7 +214,7 @@ end
 function _VECTOR.meta.__call(t,x,y,math)
 	local v
 	if _CACHE.C>0 then
-		v=_CACHE[_CACHE.C]
+		v = _CACHE[_CACHE.C]
 		_CACHE[_CACHE.C]=nil
 		_CACHE.C = _CACHE.C-1
 		v[1] = x

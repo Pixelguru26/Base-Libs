@@ -527,7 +527,7 @@ function _RECTANGLE.meta.__call(t,x,y,w,h,v)
 	--print(t,x,y,w,h,v)
 	local v = v or nil
 	if not v and _CACHE.C>0 then
-		v=table.remove(_CACHE,_CACHE.C)
+		v = table.remove(_CACHE,_CACHE.C)
 		v.dir = nil
 		_CACHE.C = _CACHE.C-1
 	elseif not v then

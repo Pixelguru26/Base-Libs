@@ -44,7 +44,7 @@ local function lerp(v,a,b)
 	return a+v*(b-a)
 end
 
--- ========================================== v.Aliases
+-- ========================================== Aliases
 
 function _POLY.aliases.x(t,v)
 	local i,x = 1,t[1].x
@@ -107,21 +107,49 @@ end
 
 -- ========================================== Methods
 
-function _POLY.order(self)
+--[[function _POLY.order(self)
 	local unsorted = true
 	local v
+	local tau = 2*math.pi
 	while unsorted do
 		unsorted = false
-		for i=2,self.c-1,1 do
+		for i=2,self.c,1 do
 			mv = self[i-1]
 			v = self[i]
 			iv = self[i+1]
-			if atan2(iv.y-v.y,iv.x-v.x) < atan2(v.y-mv.y,v.x-mv.x) then
+			-- if next segment's angle is NOT greater than previous...
+			if atan2(iv.y-v.y,iv.x-v.x)%tau < atan2(v.y-mv.y,v.x-mv.x)%tau then
 				self[i],self[i+1] = self[i+1],self[i]
+				unsorted = true
 			end
 		end
 	end
 	return self
+end]]--
+
+function _POLY.add(self,...)
+	local iv,iv1
+	local i = 0
+	while i < select('#',...) do
+		i = i + 1
+		iv = (select(i,...))
+		if type(iv)=="table" and iv.type=="vector" then
+			table.insert(self,iv)
+			self.c = self.c + 1
+		else
+			iv1 = (select(i+1,...))
+			if type(iv)=="number" and type(iv1)=="number" then
+				table.insert(self,Vec(iv,iv1))
+				i = i + 1
+				self.c = self.c+1
+			end
+		end
+	end
+end
+
+function _POLY.rem(self,i)
+	self.c = self.c - 1
+    return table.remove(self, i)
 end
 
 function _POLY.del(self)
@@ -172,12 +200,14 @@ function _POLY.meta.__call(t,...)
 	if _CACHE.C>0 then
 		v=table.remove(_CACHE,_CACHE.C)
 		_CACHE.C = _CACHE.C-1
+		for i = v.c, 1, -1 do
+			table.remove(v,i)
+		end
 	else
 		v = {}
 	end
 	v.c = 0
 	local iv,iv1
-	local choice
 	local i = 0
 	while i < select('#',...) do
 		i = i + 1
@@ -185,18 +215,14 @@ function _POLY.meta.__call(t,...)
 		if type(iv)=="table" and iv.type=="vector" then
 			table.insert(v,iv)
 			v.c = v.c + 1
-			choice = "vec"
 		else
-			choice = "nil"
 			iv1 = (select(i+1,...))
 			if type(iv)=="number" and type(iv1)=="number" then
 				table.insert(v,Vec(iv,iv1))
 				i = i + 1
 				v.c = v.c+1
-				choice = "num"
 			end
 		end
-		print(i,iv,iv1,choice)
 	end
 	return setmetatable(v,_POLY)
 end

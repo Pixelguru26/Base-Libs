@@ -246,7 +246,7 @@ Poly.lua
 
 Poly.lua is a polygon class library designed in the fashion of Vec and Line. It requires Vec and Line to work, in the same fashion as Line and Rec. Poly is designed to provide basic utilities for general shapes, such as intersection, combination, subtraction, rotation, and even some raycasting utilities.
 It should be noted that polygon is designed primarily for 2d convex polygons, though it will include functions for decomposing concave 2d polygons.
-Complex or composite polygons, however - i.e. those with holes punched in the middle - are unlikely to be well-supported. 
+Complex or composite polygons, however - i.e. those with holes punched in the middle - are unlikely to be well-supported.
 
 It is instantiated more or less as standard:
 
@@ -270,7 +270,10 @@ The polygon supports the following properties, similarly to the rectangle:
 
 The following methods are also supported:
 
->* `poly:order()` sorts the vertices in clockwise order for convex polygons.
+~~>* `poly:order()` sorts the vertices in clockwise order for convex polygons.~~
+> badly broken, working on a fix.
+>* `poly:add(...)` Adds a vertex (or vertices) to the polygon - identical behavior to construction.
+>* `poly:rem(i)` Removes a vertex from the polygon and returns it; without an index, removes last.
 
 >* `poly:del()` recycles the polygon as above.
 
@@ -300,7 +303,7 @@ overLoadedFunction:add(
 		return "string", "table", "number"
 	end,
 	{"string","table","number"}
-	-- 'add' can only handle one function at a time for now.
+	-- 'add' can handle multiple functions, simply repeat this pattern for each.
 )
 
 -- add a default version to the overloaded function:

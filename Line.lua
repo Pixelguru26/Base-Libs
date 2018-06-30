@@ -525,7 +525,7 @@ end
 function _LINE.meta.__call(t,x0,y0,x1,y1)
 	local v
 	if _CACHE.C>0 then
-		v=table.remove(_CACHE,_CACHE.C)
+		v = table.remove(_CACHE,_CACHE.C)
 		_CACHE.C = _CACHE.C-1
 	else
 		v = {}

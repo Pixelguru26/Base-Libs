@@ -15,12 +15,20 @@ local function __call(t,...)
 	end
 	return t.default(...)
 end
-local function add(t,fn,args)
-	if args then
-		t.c = t.c + 1
-		t[t.c] = {fn,args}
-	else
-		t.default = {fn,args}
+local function add(t,...)
+	local i,i1 = 1,select('#',...)
+	local fn,args
+	while i < i1 do
+		i = i + 1
+		fn = (select(i,...))
+		args = (select(i+1,...))
+		if type(args)=="table" then
+			t.c = t.c + 1
+			t[t.c] = {fn,args}
+			i = i + 1
+		else
+			t.default = {fn,args}
+		end
 	end
 end
 local function def(...)
