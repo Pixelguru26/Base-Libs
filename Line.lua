@@ -19,7 +19,7 @@ end
 local Vec=assert(_VECTOR or safeRequire("Vec"), "Cannot find/use 'Vec.lua', this is a requirement for "..lib.name.." to function!")
 if type(Vec)=="function" then Vec = Vec() end
 
-local _LINE = {Vec(0,0),Vec(0,0),_CACHE={C=0}}
+local _LINE = {Vec(0,0),Vec(0,0),_CACHE={C=0},type="line"}
 local _CACHE = _LINE._CACHE
 _LINE.aliases = {}
 _LINE.meta = {}

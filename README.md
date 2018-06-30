@@ -37,6 +37,7 @@ The vector library currently supports the following operations through metametho
 All the math operations return a new vector with the result, thus potentially impacting performance.
 The following functions and properties are also supported:
 
+>* `vec.type` returns "vector" (set)
 >* `vec.a` returns the angle of the vector from the origin *(`math.atan2(vec.y,vec.x)`)*
 >* `vec.l` returns the length of the vector *(can be slow when used repeatedly due to use of `math.sqrt()`)*
 >* `vec.n` returns a unit vector of the same angle *(make suse of `vec.l`, beware!)*
@@ -111,6 +112,7 @@ These components can be accessed as `rect.x`, `rect.y`, `rect.w`, and `rect.h` r
 
 Rectangle objects support the following properties, which can be both read and written, having operations for both:
 
+>* `rec.type` returns "rectangle" (set)
 >* `rec.l` the left side of the rectangle - returns x, sets x
 >* `rec.r` the right side of the rectangle - returns x + w, sets x (with offset of w)
 >* `rec.t` the top side of the rectangle (in inv y) - returns y, sets y
@@ -187,6 +189,7 @@ The components of the line are A and B, respectively.
 
 The line supports the following properties, similarly to the rectangle:
 
+>* `line.type` returns "line" (set)
 >* `line.x` returns the minimum x coordinate of the line (set)
 >* `line.x1` alias of x
 >* `line.y` returns the minimum y coordinate of the line (set)
@@ -261,12 +264,13 @@ Warning: Poly.lua is entirely new and still WIP. Precise documentation will not 
 
 The polygon supports the following properties, similarly to the rectangle:
 
->* `line.x` returns the minimum x coordinate of the polygon (set)
->* `line.x1` alias of x
->* `line.y` returns the minimum y coordinate of the polygon (set)
->* `line.y1` alias of y
->* `line.x2` returns the maximum x coordinate of the polygon (set)
->* `line.y2` returns the maximum y coordinate of the polygon (set)
+>* `poly.type` returns "polygon" (set)
+>* `poly.x` returns the minimum x coordinate of the polygon (set)
+>* `poly.x1` alias of x
+>* `poly.y` returns the minimum y coordinate of the polygon (set)
+>* `poly.y1` alias of y
+>* `poly.x2` returns the maximum x coordinate of the polygon (set)
+>* `poly.y2` returns the maximum y coordinate of the polygon (set)
 
 The following methods are also supported:
 
