@@ -19,6 +19,7 @@ The function returned by `Vec` returns a local vector lib object, assigns the ve
 local vec = Vec(0,0)
 ```
 
+did it work?
 The new vector has an x component of 0 and a y component of 0. The local variable foo becomes the new vector object, and can now be used as such.
 The vector library currently supports the following operations through metamethods:
 
@@ -27,7 +28,7 @@ The vector library currently supports the following operations through metametho
 >* (`*`) multiplication
 >* (`/`) division
 >* (`%`) modulus
->* (`^`) power *(this is done vie lua's core ^ operator, which may function differently depending on the implementation)*
+>* (`^`) power *(this is done via lua's core ^ operator, which may function differently depending on the implementation)*
 >* (`..`) dot product
 >* (`==`) equality check
 >* (`>`/`<`) greater-than/less-than check

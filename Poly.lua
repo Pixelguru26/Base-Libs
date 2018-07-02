@@ -1,3 +1,17 @@
+--[[
+-- TODO:
+> decomposition
+> SAT poly
+> addition
+> subtraction
+> Minkowski math
+> line intersection
+> cutting/scissors
+> expulsion
+> scaling
+]]--
+
+-- ==========================================
 local lib={name="Poly"}
 local reqLocations = {"","lib/","libs/","Lib/","Libs/","Base-Libs/","BLibs/","BaseLibs/","base-libs/","blibs/","baselibs/"}
 for i = 6,#reqLocations do
@@ -105,6 +119,59 @@ function _POLY.aliases.y2(t,v)
 	end
 end
 
+function _POLY.aliases.mx(t,v)
+	if v then
+		local mx = 0
+		for i,iv in ipairs(t) do
+			mx = mx + iv.x
+		end
+		mx = mx / t.c
+		local dx = v - mx
+		for i,iv in ipairs(t) do
+			iv.x = iv.x + dx
+		end
+	else
+		local r = 0
+		for i,v in ipairs(t) do
+			r = r + v.x
+		end
+		return r/t.c
+	end
+end
+function _POLY.aliases.my(t,v)
+	if v then
+		local my = 0
+		for i,iv in ipairs(t) do
+			my = my + iv.y
+		end
+		my = my / t.c
+		local dy = v - my
+		for i,iv in ipairs(t) do
+			iv.y = iv.y + dy
+		end
+	else
+		local r = 0
+		for i,v in ipairs(t) do
+			r = r + v.y
+		end
+		return r/t.c
+	end
+end
+function _POLY.aliases.mid(t,v)
+	if v then
+		local dx, dy = v.x - m.x, v.y - m.y
+		for i,iv in ipairs(t) do
+			iv.x, iv.y = iv.x + dx, iv.y + dy
+		end
+	else
+		local r = Vec(0,0)
+		for i,v in ipairs(t) do
+			r:add(v)
+		end
+		return r/t.c
+	end
+end
+
 -- ========================================== Methods
 
 --[[function _POLY.order(self)
@@ -125,7 +192,123 @@ end
 		end
 	end
 	return self
-end]]--
+end
+]]--
+
+function _POLY.SATPoint(self,a)
+	local v1,px,py,l,dp
+	local minI,minDist = 1, math.huge
+	for i,v in ipairs(self) do
+		v1 = self[i+1]
+		px,py = v1.y-v.y, -v1.x+v.x -- left normal
+		l = sqrt( px * px + py * py )
+		dp = ( a.x * px / l + a.y * py / l )
+		if dp < minDist then
+			minI = i
+			minDist = dp
+		end
+	end
+	return minDist <= 0, minI, minDist
+end
+
+local function deltaDP(a,b,v)
+	local vx,vy,dx,dy = v.x-a.x, v.y-a.y, b.x-a.x, b.y-a.y
+	local l = sqrt(bx*bx+by*by)
+	return (vx*bx/l+vy*by/l)
+end
+
+function _POLY.SATNearest(self,other,getDelta,getImpact)
+	local v1,px,py,l,dp
+	local minSide, minPoint, minDist = 1, 1, math.huge
+	local typeA = false
+	local within = true
+	local within1, delta, impact
+	for i,v in ipairs(self) do
+		v1 = self[i+1]
+		within1 = false
+		for ii,iv in ipairs(other) do
+			px,py = v1.y-v.y, -v1.x+v.x -- left normal
+			l = sqrt( px * px + py * py )
+			dp = ( v.x * px / l + v.y * py / l )
+			if dp < minDist then
+				minSide = i
+				minPoint = ii
+				minDist = dp
+				typeA = false
+			end
+			if dp <= 0 then
+				within1 = true
+			end
+		end
+		within = within and within1
+	end
+	for i,v in ipairs(other) do
+		v1 = other[i+1]
+		within1 = false
+		for ii,iv in ipairs(self) do
+			px,py = v1.y-v.y, -v1.x+v.x -- left normal
+			l = sqrt( px * px + py * py )
+			dp = ( v.x * px / l + v.y * py / l )
+			if dp < minDist then
+				minSide = i
+				minPoint = ii
+				minDist = dp
+				typeA = true
+			end
+			if dp <= 0 then
+				within1 = true
+			end
+		end
+		within = within and within1
+	end
+	if within and typeA then
+		if getDelta then
+			local point = deltaDP(other[minSide],other[minSide+1],self[minPoint])*(other[minSide+1]-other[minSide]):del()
+			delta = point-self[minPoint]
+			if getImpact then
+				impact = point
+			else
+				point:del()
+			end
+		end
+	elseif within then
+		if getDelta then
+			local point = deltaDP(self[minSide],self[minSide+1],other[minPoint])*(self[minSide+1]-self[minSide]):del()
+			delta = other[minPoint]-point
+			if getImpact then
+				impact = point
+			else
+				point:del()
+			end
+		end
+		if getImpact then
+			impact = other:aPos(nearestPoint)
+		end
+	end
+	return within,
+		typeA,
+		minSide,
+		minPoint,
+		minDist,
+		(getDelta and delta) or (getImpact and impact),
+		(getImpact and getDelta and impact)
+end
+
+function _POLY.SATPoly(self,other)
+
+end
+
+function _POLY.rot(self,a) -- oki
+	local pivot = self.mid
+	local dx,dy
+	local sinA,cosA = sin(a),cos(a)
+	for i,v in ipairs(self) do
+		dx,dy = v.x - pivot.x, v.y - pivot.y
+		v.x = pivot.x + ( dx * cosA - dy * sinA )
+		v.y = pivot.y + ( dx * sinA + dy * cosA )
+	end
+	pivot:del()
+end
 
 function _POLY.add(self,...)
 	local iv,iv1
