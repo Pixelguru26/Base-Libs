@@ -19,7 +19,6 @@ The function returned by `Vec` returns a local vector lib object, assigns the ve
 local vec = Vec(0,0)
 ```
 
-did it work?
 The new vector has an x component of 0 and a y component of 0. The local variable foo becomes the new vector object, and can now be used as such.
 The vector library currently supports the following operations through metamethods:
 
