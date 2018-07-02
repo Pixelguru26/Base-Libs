@@ -317,19 +317,24 @@ _RECTANGLE.data={}
 		end
 	end
 	function _RECTANGLE.SATIntersect(self,other)
-		local within = true
+		local v,within1
 		for i = 1,self.dir and 3 or 4 do
-			local v = Line.fromRecI(self,i)
-			local within1 = v:SATPointsRec(other)
-			within = within and within1
+			v = Line.fromRecI(self,i)
+			within = v:SATPointsRec(other)
 			v:del()
+			if not within then
+				return false
+			end
 		end
 		for i = 1,other.dir and 3 or 4 do
-			local v = Line.fromRecI(other,i)
-			local within1 = v:SATPointsRec(self)
-			within = within and within1
+			v = Line.fromRecI(other,i)
+			within = v:SATPointsRec(self)
+			v:del()
+			if not within then
+				return false
+			end
 		end
-		return within
+		return true
 	end
 	function _RECTANGLE.SATNearest(self,other,getDelta,getImpact)
 		local within = true
