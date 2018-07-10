@@ -16,7 +16,6 @@ local atan2 = math.atan2
 local abs = math.abs
 
 _VECTOR.meta={}
-local x,y
 function _VECTOR.__index(t,k)
 	if type(_VECTOR[k])=='function' then
 		return _VECTOR[k](t)
@@ -96,10 +95,10 @@ end
 	        return _VECTOR(b.x^a,b.y^a,true)
 	    end
 	end
-	function _VECTOR.__concat(b,a) -- DOT PRODUCT
+	function _VECTOR.__concat(a,b) -- DOT PRODUCT
 	    if type(a)=='table' and type(b)=='table' then
-	    	local al = a.l
-	    	return(a.x/al*b.x+a.y/al*b.y)
+	    	local bl = sqrt(b.x*b.x+b.y*b.y)
+	    	return(b.x/bl*a.x+b.y/bl*a.y)
 	    end
 	end
 
@@ -140,14 +139,20 @@ end
 	_VECTOR.A=_VECTOR.a
 
 	-- Vector magnitude - length
-	function _VECTOR.l(t)
+	function _VECTOR.l(t,v)
 		--[[local a = t.a
 		if a>7*math.pi/4 or a<math.pi/4 or a>3*math.pi/4 and a<5*math.pi/4 then
 			return t.x/math.cos(a)
 		else
 			return t.y/math.sin(a)
 		end]]--
-		return sqrt(t.x*t.x+t.y*t.y)
+		if v then
+			local l = sqrt(t.x*t.x+t.y*t.y)
+			t.x = t.x/l*v
+			t.y = t.y/l*v
+		else
+			return sqrt(t.x*t.x+t.y*t.y)
+		end
 	end
 	_VECTOR.L=_VECTOR.l
 
@@ -196,8 +201,8 @@ end
 	end
 
 	function _VECTOR.funcs.dist(self,other)
-		x = other.x-self.x
-		y = other.y-self.y
+		local x = other.x-self.x
+		local y = other.y-self.y
 		return sqrt(x*x+y*y)
 	end
 
@@ -362,15 +367,6 @@ function _VECTOR.funcs.mod(self,other)
 	end
 	return self
 end
-
--- an old distance method I keep only for reference.
---[[function dist(x1,y1,x2,y2)
-	if type(x1)=="table" then -- vec mode
-		return dist(x1.x,x1.y,y1.x,y1.y)
-	else
-		return math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
-	end
-end]]--
 
 local function ret(...)
 	local args={...}

@@ -383,6 +383,7 @@ _RECTANGLE.data={}
 				local _,point = Line.fromRecI(other,nearestSide):del():projVec(nearCorner,true)
 				delta = point-nearCorner
 				nearCorner:del()
+				point:del()
 			end
 			if getImpact then
 				impact = self:aPos(nearestPoint)
@@ -393,6 +394,7 @@ _RECTANGLE.data={}
 				local _,point = Line.fromRecI(self,nearestSide):del():projVec(nearCorner,true)
 				delta = nearCorner-point
 				nearCorner:del()
+				point:del()
 			end
 			if getImpact then
 				impact = other:aPos(nearestPoint)

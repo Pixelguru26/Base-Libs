@@ -326,3 +326,90 @@ print(
 	overLoadedFunction(1,"str",{}) -- calls the correct version of the function for the given arg types
 ) -- prints "number	string	table"
 ```
+Struct.lua
+---
+
+Struct is a framework for building generic struct types similar to those included in this library. It provides memory (garbage) management, aliasing, and type call constructors, among others, all in the same style as the other components of this collection.
+
+Included functionality is as follows
+
+>* `type` Every struct is required to have a type.
+>	`(enforced in struct creation)`
+>* `constructor` Every struct can construct instances.
+>	`(enforced in struct creation)`
+>* `del()` Instances can be recycled after use.
+>	`(implicit to struct instantiation)`
+>* `__gc` The \_\_gc metamethod is called on an instance upon recycling.
+>	`Type.__gc = function(t) end`
+>* `aliases` Struct aliases allow intuitive usage of complex systems.
+>	`Type.aliases.key1 = key2`
+>	`Type.aliases.key = function(t,v) end`
+>* `metamethods` Struct metamethods are automatically implemented. However, index and newindex are built in.
+>	`Type.__add = function(a,b) end`
+>* `range` Structs with variable indices can have \_\_MIN and \_\_MAX indices defined, beyond which accesses will loop.
+>	`Type.__MAX = 10` (instance[18] is now equivalent to instance[8])
+>	`Type.__MIN = 1` (implicit, if \_\_MAX is defined)
+>	`instance.__MAX = 10` (behavior only implemented on instance, overrides Type)
+>	`instance.__MIN = 1` (still implicit, if \_\_MAX is defined)
+
+Example usage is as follows:
+
+```lua
+
+local Struct = require("Base-Libs/Struct")
+
+-- format for creating a new struct type:
+local Vec = Struct(
+	"vector", -- type identifier of this struct
+	function(self,x,y) -- constructor
+		self[1] = x
+		self[2] = y
+	end
+)
+-- Vec is now a type.
+
+-- adding a metamethod
+-- the struct is the metatable for all instances.
+Vec.__tostring = function(t)
+	return "<"..t.x..","..t.y..">"
+end
+
+-- adding aliases for variable locations
+-- v.x
+-- v.x = 10
+Vec.aliases.x = 1
+Vec.aliases.y = 2
+
+-- A function alias is implicitely called, much like a set/get property.
+-- If v is supplied, it is a set. Otherwise, it is get.
+-- This model does not allow setting to nil.
+Vec.aliases.l = function(t,v)
+	if v then
+		local l = math.sqrt(t.x*t.x+t.y*t.y)
+		t.x = t.x/l*v
+		t.y = t.y/l*v
+	else
+		return math.sqrt(t.x*t.x + t.y*t.y)
+	end
+end
+
+-- adding a function to the struct
+-- v:dist(other)
+Vec.funcs.dist = function(self,other)
+	return sqrt(
+		(other.x-self.x) *
+		(other.x-self.x) +
+		(other.y-self.y) *
+		(other.y-self.y)
+	)
+end
+
+-- instantiating the struct
+local Val = Vec(1,2)
+print(Val)
+-- >> <1,2>
+
+-- queues the instance for recycling when another is constructed
+Val:del()
+
+```

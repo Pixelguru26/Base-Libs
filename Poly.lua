@@ -65,11 +65,13 @@ function _POLY.aliases.x(t,v)
 	for ii,iv in ipairs(t) do
 		if iv.x <= x then
 			i = ii
-			x = iv
+			x = iv.x
 		end
 	end
 	if v then
-		t[i].x = v
+		for ii,iv in ipairs(t) do
+			iv.x = iv.x - x + v
+		end
 	else
 		return x
 	end
@@ -80,11 +82,13 @@ function _POLY.aliases.y(t,v)
 	for ii,iv in ipairs(t) do
 		if iv.y <= y then
 			i = ii
-			y = iv
+			y = iv.y
 		end
 	end
 	if v then
-		t[i].y = v
+		for ii,iv in ipairs(t) do
+			iv.y = iv.y - y + v
+		end
 	else
 		return y
 	end
@@ -95,11 +99,13 @@ function _POLY.aliases.x2(t,v)
 	for ii,iv in ipairs(t) do
 		if iv.x >= x then
 			i = ii
-			x = iv
+			x = iv.x
 		end
 	end
 	if v then
-		t[i].x = v
+		for ii,iv in ipairs(t) do
+			iv.x = iv.x - x + v
+		end
 	else
 		return x
 	end
@@ -109,11 +115,13 @@ function _POLY.aliases.y2(t,v)
 	for ii,iv in ipairs(t) do
 		if iv.y >= y then
 			i = ii
-			y = iv
+			y = iv.y
 		end
 	end
 	if v then
-		t[i].y = v
+		for ii,iv in ipairs(t) do
+			iv.y = iv.y - y + v
+		end
 	else
 		return y
 	end
@@ -213,49 +221,98 @@ end
 
 local function deltaDP(a,b,v)
 	local vx,vy,dx,dy = v.x-a.x, v.y-a.y, b.x-a.x, b.y-a.y
-	local l = sqrt(bx*bx+by*by)
-	return (vx*bx/l+vy*by/l)
+	local l = sqrt(dx*dx+dy*dy)
+	return (vx*dx/l+vy*dy/l)
 end
 
+local function project(a,b,v)
+	local vx,vy, dx,dy = v.x-a.x,v.y-a.y, b.x-a.x,b.y-a.y
+	local l = sqrt(dx*dx+dy*dy)
+	local dp = (vx*dx/l+vy*dy/l)
+	return dp*dx/l,dp*dy/l
+end
+
+local function debugLine(v1,v2,x2,y2)
+	local r,g,b,a = love.graphics.getColor()
+	love.graphics.setColor(1,0,0,1)
+	if type(v1)=="table" then
+		love.graphics.line(v1.x,v1.y,v2.x,v2.y)
+	else
+		love.graphics.line(v1,v2,x2,y2)
+	end
+	love.graphics.setColor(r,g,b,a)
+end
+local function debugPoint(x,y)
+	local r,g,b,a = love.graphics.getColor()
+	love.graphics.setColor(1,0,0,1)
+	if type(x)=="table" then
+		love.graphics.circle("fill",x.x,x.y,3)
+	else
+		love.graphics.circle("fill",x,y,3)
+	end
+	love.graphics.setColor(r,g,b,a)
+end
 function _POLY.SATNearest(self,other,getDelta,getImpact)
+	if self.c == 0 then
+		return false
+	end
+	if other.c == 0 then
+		return false
+	end
+	if self.c == 1 then
+		return other:SATPoint(self[1])
+	end
+	if other.c == 1 then
+		return self:SATPoint(other[1])
+	end
 	local v1,px,py,l,dp
-	local minSide, minPoint, minDist = 1, 1, math.huge
+	local minSide, minPoint, minDist = 1, 1, -math.huge
 	local typeA = false
 	local within = true
 	local within1, delta, impact
-	for i,v in ipairs(self) do
-		v1 = self[i+1]
+	-- type A
+	for i,v in ipairs(other) do
+		v1 = other[i+1]
 		within1 = false
-		for ii,iv in ipairs(other) do
-			px,py = v1.y-v.y, -v1.x+v.x -- left normal
-			l = sqrt( px * px + py * py )
-			dp = ( v.x * px / l + v.y * py / l )
-			if dp < minDist then
-				minSide = i
-				minPoint = ii
-				minDist = dp
-				typeA = false
-			end
+		px,py = v1.y-v.y, -v1.x+v.x -- left normal
+		l = sqrt( px * px + py * py )
+		for ii,iv in ipairs(self) do
+			dp = ( (iv.x - v.x) * px / l + (iv.y - v.y) * py / l )
 			if dp <= 0 then
+				if dp > minDist then
+					minSide = i
+					minPoint = ii
+					minDist = dp
+					typeA = true
+				end
 				within1 = true
 			end
 		end
 		within = within and within1
 	end
-	for i,v in ipairs(other) do
-		v1 = other[i+1]
+	--[[for i,v in ipairs(self) do
+		for ii,iv in ipairs(other) do
+			v1 = other[ii+1]
+			px = v1.y - iv.y
+			py = iv.x - v1.x
+			dp = ( () )
+		end
+	end]]--
+	-- type B
+	for i,v in ipairs(self) do
+		v1 = self[i+1]
 		within1 = false
-		for ii,iv in ipairs(self) do
-			px,py = v1.y-v.y, -v1.x+v.x -- left normal
-			l = sqrt( px * px + py * py )
-			dp = ( v.x * px / l + v.y * py / l )
-			if dp < minDist then
-				minSide = i
-				minPoint = ii
-				minDist = dp
-				typeA = true
-			end
+		px,py = v1.y-v.y, -v1.x+v.x -- left normal
+		l = sqrt( px * px + py * py )
+		for ii,iv in ipairs(other) do
+			dp = ( (iv.x - v.x) * px / l + (iv.y - v.y) * py / l )
 			if dp <= 0 then
+				if dp > minDist then
+					minSide = i
+					minPoint = ii
+					minDist = dp
+					typeA = false
+				end
 				within1 = true
 			end
 		end
@@ -263,26 +320,37 @@ function _POLY.SATNearest(self,other,getDelta,getImpact)
 	end
 	if within and typeA then
 		if getDelta then
-			local point = deltaDP(other[minSide],other[minSide+1],self[minPoint])*(other[minSide+1]-other[minSide]):del()
-			delta = point-self[minPoint]
+			debugLine(other[minSide],other[minSide+1])
+			debugPoint(self[minPoint])
+			local point = Vec(project(other[minSide],other[minSide+1],self[minPoint])):add(other[minSide])
+			debugPoint(point)
+			delta = point:del() - self[minPoint]
+			debugLine(self[minPoint],self[minPoint]+delta)
 			if getImpact then
 				impact = point
 			else
-				point:del()
-			end
-		end
-	elseif within then
-		if getDelta then
-			local point = deltaDP(self[minSide],self[minSide+1],other[minPoint])*(self[minSide+1]-self[minSide]):del()
-			delta = other[minPoint]-point
-			if getImpact then
-				impact = point
-			else
-				point:del()
+				--point:del()
 			end
 		end
 		if getImpact then
-			impact = other:aPos(nearestPoint)
+			impact = self[nearestPoint]
+		end
+	elseif within then
+		if getDelta then
+			debugLine(self[minSide],self[minSide+1])
+			debugPoint(other[minPoint])
+			local point = Vec(project(self[minSide],self[minSide+1],other[minPoint])):add(self[minSide])
+			debugPoint(point)
+			delta = other[minPoint] - point:del()
+			debugLine(other[minPoint],other[minPoint]+delta)
+			if getImpact then
+				impact = point
+			else
+				--point:del()
+			end
+		end
+		if getImpact then
+			impact = other[nearestPoint]
 		end
 	end
 	return within,
@@ -369,7 +437,7 @@ end
 
 function _POLY.__index(t,k)
 	if type(k)=="number" then
-		return t[(k-1)%t.c+1]
+		return rawget(t,(k-1)%t.c+1)
 	elseif _POLY.aliases[k] then
 		if type(_POLY.aliases[k])~="function" then
 			return t[_POLY.aliases[k]]
@@ -387,7 +455,7 @@ function _POLY.__newindex(t,k,v)
 		if type(_POLY.aliases[k])~="function" then
 			t[_POLY.aliases[k]] = v
 		else
-			POLY.aliases[k](t,v)
+			_POLY.aliases[k](t,v)
 		end
 	else
 		rawset(t,k,v)
